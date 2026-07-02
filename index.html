@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pou Doors Game 3.0</title>
+    <title>Pou Doors Game 3.1</title>
     <style>
         *, *::before, *::after {
             box-sizing: border-box;
@@ -50,7 +50,6 @@
             --bg-log: #005250;
         }
 
-        /* 🌧️ Estado especial de Lluvia Climatológica */
         .weather-rainy {
             --bg-body: #2b3a4a !important;
             --bg-container: #1c2630 !important;
@@ -98,6 +97,882 @@
         }
 
         h1 {
+            color: var(--text-title);
+            margin-bottom: 5px;
+            font-size: 24pt;
+        }
+        .subtitle {
+            color: var(--text-main);
+            opacity: 0.8;
+            font-size: 11pt;
+            margin-bottom: 25px;
+        }
+
+        .save-system-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-panel);
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        .file-label-btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 9pt;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .file-label-btn.disabled-btn {
+            background-color: #cccccc !important;
+            color: #888888 !important;
+            cursor: not-allowed !important;
+        }
+
+        .export-btn {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 9pt;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .export-btn:disabled {
+            background-color: #cccccc !important;
+            color: #888888 !important;
+            cursor: not-allowed !important;
+        }
+        
+        .days-counter {
+            background: #e63946;
+            color: white;
+            font-weight: bold;
+            font-size: 14pt;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 5px;
+            box-shadow: 0 4px 10px rgba(230, 57, 70, 0.2);
+        }
+        .difficulty-badge {
+            font-size: 9.5pt;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ff9f1c;
+        }
+
+        .stats-panel {
+            background: var(--bg-panel);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: left;
+            border: 1px solid var(--border-panel);
+        }
+        .stat-group { margin-bottom: 15px; }
+        
+        .stat-label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 11pt;
+        }
+        .progress-bar-container {
+            width: 100%;
+            height: 18px;
+            background-color: #e9ecef;
+            border-radius: 9px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        #hunger-bar { background-color: #4caf50; }
+        #empacho-bar { background-color: #2ec4b6; }
+        
+        .inventory-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .inventory-box {
+            background: #e2eafc;
+            color: #1d3557;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 9.5pt;
+            flex: 1;
+            min-width: 90px;
+            text-align: center;
+        }
+        
+        #coins-box { background: #fefae0; color: #b5820f; }
+        #takis-box { background: #ffe3e3; color: #c1121f; display: none; }
+
+        .log {
+            min-height: 75px;
+            margin: 15px 0 25px 0;
+            padding: 15px;
+            background: var(--bg-log);
+            border-radius: 10px;
+            font-style: italic;
+            font-size: 11pt;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-left: 5px solid #3a506b;
+        }
+
+        .doors-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0 20px 0;
+        }
+        .door-btn {
+            background-color: #3a506b;
+            color: white;
+            border: none;
+            padding: 18px 28px;
+            font-size: 14pt;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: 0.1s;
+        }
+        .door-btn:hover { background-color: #1c2541; }
+        .door-btn:disabled { background-color: #cccccc; cursor: not-allowed; color: #888888; }
+
+        .game-section-box {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: left;
+        }
+        .feed-section { background-color: #f4fbf7; border: 2px dashed #a3e635; }
+        .shop-section { background-color: #fffdf0; border: 2px dashed #eab308; }
+
+        .buttons-grid {
+            display: flex;
+            justify-content: space-around;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            color: white;
+            border: none;
+            padding: 12px 10px;
+            font-size: 9.5pt;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: 0.2s;
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+        }
+        #feed-burger { background-color: #4caf50; }
+        #feed-sandwich { background-color: #00afb9; }
+        #feed-soup { background-color: #9b5de5; }
+        #feed-takis { background-color: #c1121f; display: none; }
+        #buy-sandwich { background-color: #f1a208; }
+        #buy-potion { background-color: #d62828; }
+        #buy-upgrade { background-color: #06b6d4; min-width: 100%; }
+        .cosmetic-btn { background-color: #6c757d; font-size: 8.5pt; }
+
+        .action-btn:disabled {
+            background-color: #cccccc !important;
+            color: #888888 !important;
+            cursor: not-allowed;
+        }
+
+        .achievements-section {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-panel);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        .ach-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        @media(max-width: 500px) { .ach-grid { grid-template-columns: 1fr; } }
+        
+        .ach-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 8.5pt;
+            color: #888888;
+            font-weight: 500;
+            background: rgba(0,0,0,0.03);
+            padding: 6px;
+            border-radius: 6px;
+        }
+        .ach-item.unlocked { color: var(--text-main); font-weight: bold; background: rgba(0,245,212,0.08); }
+        .ach-badge { font-size: 11pt; display: inline-block; flex-shrink: 0; filter: grayscale(100%); opacity: 0.4; }
+        .ach-item.unlocked .ach-badge { filter: grayscale(0%); opacity: 1; }
+
+        .reset-btn {
+            background-color: #e63946;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 11pt;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .steam-toast {
+            position: fixed;
+            bottom: -100px;
+            right: 20px;
+            background: #171a21;
+            color: #c6d4df;
+            border: 2px solid #c7931c;
+            border-radius: 4px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-align: left;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            z-index: 9999;
+            width: 330px;
+            transition: bottom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .steam-toast.show { bottom: 20px; }
+        .steam-toast-icon { font-size: 24pt; color: #ffb800; line-height: 1; }
+        .steam-toast-content h4 { margin: 0; color: #ffffff; font-size: 10pt; letter-spacing: 0.5px; text-transform: uppercase; }
+        .steam-toast-content p { margin: 3px 0 0 0; font-size: 9pt; color: #8f98a0; }
+    </style>
+</head>
+<body>
+
+<div class="game-container" id="main-box">
+    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">Modo Oscuro</button>
+
+    <h1>Pou Doors Game 3.1</h1>
+    <p class="subtitle">Explora con cuidado y cuida bien a Pou</p>
+
+    <div class="save-system-block">
+        <div>
+            <label for="import-file" class="file-label-btn" id="import-label">📁 Importar (.pou)</label>
+            <input type="file" id="import-file" accept=".pou" style="display: none;" onchange="importGame(event)">
+        </div>
+        <button class="export-btn" id="export-btn" onclick="exportGame()">💾 Exportar (.pou)</button>
+    </div>
+    
+    <div class="days-counter" id="days-box">Dias Sobrevividos: 0 (Puertas: 0/5)</div>
+    <div class="difficulty-badge" id="difficulty-box">Dificultad: Facil (Hambre normal)</div>
+    
+    <div class="stats-panel">
+        <div class="stat-group">
+            <div class="stat-label">
+                <span>Hambre de Pou</span>
+                <span><span id="hunger-text">125</span> / <span id="max-hunger-text">250</span></span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="hunger-bar" class="progress-bar"></div>
+            </div>
+        </div>
+        
+        <div class="stat-group">
+            <div class="stat-label">
+                <span>Nivel de Empacho</span>
+                <span><span id="empacho-text">0</span> / 5</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="empacho-bar" class="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="inventory-container">
+            <div class="inventory-box">Burgers: <span id="burger-text">0</span></div>
+            <div class="inventory-box">Sandwiches: <span id="sandwich-text">0</span></div>
+            <div class="inventory-box" id="soup-box" style="background: #f3e5f5; color: #4a148c;">Sopas: <span id="soup-text">0</span></div>
+            <div class="inventory-box" id="takis-box">Takis Pou: <span id="takis-text">0</span></div>
+            <div class="inventory-box" id="coins-box">Monedas: <span id="coins-text">0</span></div>
+        </div>
+    </div>
+
+    <div class="log" id="game-log">Elige una puerta para comenzar la gran aventura.</div>
+    <button class="reset-btn" id="reset-btn" onclick="resetGame()">Reiniciar Juego</button>
+
+    <div id="game-actions">
+        <h3 style="font-size: 11pt; margin-bottom: 5px; text-align: left;">1. Explorar puertas:</h3>
+        <div class="doors-container">
+            <button class="door-btn" id="door-1" onclick="openDoor(1)">Puerta 1</button>
+            <button class="door-btn" id="door-2" onclick="openDoor(2)">Puerta 2</button>
+            <button class="door-btn" id="door-3" onclick="openDoor(3)">Puerta 3</button>
+        </div>
+
+        <div class="game-section-box feed-section">
+            <h3 style="font-size: 11pt; margin-top: 0; margin-bottom: 10px;">2. Alimentar a Pou:</h3>
+            <div class="buttons-grid">
+                <button class="action-btn" id="feed-burger" onclick="feedPou('burger')" disabled>Hamburguesa (-75)</button>
+                <button class="action-btn" id="feed-sandwich" onclick="feedPou('sandwich')" disabled>Sandwich Pou (-30)</button>
+                <button class="action-btn" id="feed-soup" onclick="feedPou('soup')" disabled>Sopa Pou (RESET)</button>
+                <button class="action-btn" id="feed-takis" onclick="feedPou('takis')" disabled>Takis Pou (-100)</button>
+            </div>
+        </div>
+
+        <div class="game-section-box shop-section">
+            <h3 style="font-size: 11pt; margin-top: 0; margin-bottom: 10px;">3. Tienda de Monedas / Cosmeticos:</h3>
+            <div class="buttons-grid">
+                <button class="action-btn" id="buy-sandwich" onclick="buyItem('sandwich')" disabled>Sandwich (3 Monedas)</button>
+                <button class="action-btn" id="buy-potion" onclick="buyItem('potion')" disabled>Pocion Digestion -2 (5 Monedas)</button>
+            </div>
+            <div class="buttons-grid" style="margin-top: 8px;">
+                <button class="action-btn cosmetic-btn" id="buy-theme-space" onclick="buyTheme('space')" disabled>Tema Espacio (8 Monedas)</button>
+                <button class="action-btn cosmetic-btn" id="buy-theme-aqua" onclick="buyTheme('aqua')" disabled>Tema Aqua (12 Monedas)</button>
+            </div>
+            <div class="buttons-grid" style="margin-top: 8px;">
+                <button class="action-btn" id="buy-upgrade" onclick="buyUpgrade()" disabled>⚡ Mega Estómago Pou (+50 Max) (100 Monedas)</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="achievements-section">
+        <h3 style="font-size: 11pt; margin: 0;">🏆 Lista de Logros (Sistema Steam):</h3>
+        <div class="ach-grid">
+            <div class="ach-item" id="ach-join"><span class="ach-badge">🔒</span> Pou se ha unido a la partida</div>
+            <div class="ach-item" id="ach-days"><span class="ach-badge">🔒</span> Superviviente Nato (Dia 5)</div>
+            <div class="ach-item" id="ach-nightmare-mode"><span class="ach-badge">🔒</span> Modo Pesadilla Activado (Dia 15)</div>
+            <div class="ach-item" id="ach-surv-30"><span class="ach-badge">🔒</span> Pousito Sobreviviente Extremo (Dia 30)</div>
+            <div class="ach-item" id="ach-surv-50"><span class="ach-badge">🔒</span> Pou Sobreviviente de puertas (Dia 50)</div>
+            <div class="ach-item" id="ach-surv-100"><span class="ach-badge">🔒</span> Como llegamos a esto? (Dia 100)</div>
+            <div class="ach-item" id="ach-surv-300"><span class="ach-badge">🔒</span> Pou Po Pou! (Dia 300)</div>
+            <div class="ach-item" id="ach-surv-500"><span class="ach-badge">🔒</span> DAME MAS DIAS MAS DIAS (Dia 500)</div>
+            <div class="ach-item" id="ach-surv-1000"><span class="ach-badge">🔒</span> El final (Dia 1000)</div>
+            
+            <div class="ach-item" id="ach-coins"><span class="ach-badge">🔒</span> Pou Magnate (15 Monedas)</div>
+            <div class="ach-item" id="ach-money-100"><span class="ach-badge">🔒</span> 100 - Pou Dineroso</div>
+            <div class="ach-item" id="ach-money-500"><span class="ach-badge">🔒</span> 500 - Lluvia de billetes Pou</div>
+            <div class="ach-item" id="ach-money-1000"><span class="ach-badge">🔒</span> 1000 - esto se sale de control</div>
+            <div class="ach-item" id="ach-money-2000"><span class="ach-badge">🔒</span> 2000 - Pou comprame deltarune</div>
+            <div class="ach-item" id="ach-money-5000"><span class="ach-badge">🔒</span> 5000 - un poco mucho de dinero</div>
+            <div class="ach-item" id="ach-money-10000"><span class="ach-badge">🔒</span> 10000 - Es un Sueño!!!!</div>
+            
+            <div class="ach-item" id="ach-hack"><span class="ach-badge">🔒</span> Archivo Editado Exitosamente</div>
+            <div class="ach-item" id="ach-rainylainy"><span class="ach-badge">🔒</span> RainyLainy Thats The Name</div>
+            <div class="ach-item" id="ach-lucky20"><span class="ach-badge">🔒</span> Suerte, Suerte que Buena Es!</div>
+            <div class="ach-item" id="ach-nuggets"><span class="ach-badge">🔒</span> Nuggets Del PouDonalds</div>
+            <div class="ach-item" id="ach-takis"><span class="ach-badge">🔒</span> Exceso de Pous Picantes</div>
+            <div class="ach-item" id="ach-proud"><span class="ach-badge">🔒</span> Pou, ¿estas orgulloso?</div>
+            
+            <div class="ach-item" id="ach-danger"><span class="ach-badge">🔒</span> Al Filo del Peligro (Hambre > 230)</div>
+            <div class="ach-item" id="ach-rescue"><span class="ach-badge">🔒</span> Rescate Milagroso</div>
+            <div class="ach-item" id="ach-thief"><span class="ach-badge">🔒</span> Iman de Ladrones</div>
+            <div class="ach-item" id="ach-fitness"><span class="ach-badge">🔒</span> Pou Fitness (Dia 5 sin Burger)</div>
+            <div class="ach-item" id="ach-soup"><span class="ach-badge">🔒</span> Gourmet Legendario (2 Sopas)</div>
+            <div class="ach-item" id="ach-nightmare"><span class="ach-badge">🔒</span> Sobreviviente Pesadilla</div>
+        </div>
+    </div>
+</div>
+
+<div id="steam-notification" class="steam-toast">
+    <div class="steam-toast-icon">🏆</div>
+    <div class="steam-toast-content">
+        <h4>Logro unlocked</h4>
+        <p id="toast-title">Nombre del logro</p>
+    </div>
+</div>
+
+<script>
+    let maxHunger = 250;
+    const MAX_EMPACHO = 5;
+    
+    let hunger = 125;
+    let burgerInventory = 0;
+    let sandwichInventory = 0;
+    let soupInventory = 0;
+    let takisInventory = 0;
+    let coinsInventory = 0; 
+    let foodEaten = 0; 
+    let gameOver = false;
+
+    let totalDoorsOpened = 0;
+    let daysSurvived = 0;
+
+    let unlockedThemes = { space: false, aqua: false };
+    let hasHungerUpgrade = false;
+    
+    let totalBurgersEaten = 0;
+    let totalSandwichesEaten = 0;
+    let totalSoupsEaten = 0;
+
+    let timesRobbed = 0;
+    let burgersFedCount = 0; 
+    let soupsFedCount = 0;
+    let daysSpentInNightmare = 0;
+    let isRaining = false;
+
+    let achievements = {
+        join: false, days: false, nightmareMode: false, surv30: false, surv50: false, surv100: false, surv300: false, surv500: false, surv1000: false,
+        coins: false, money100: false, money500: false, money1000: false, money2000: false, money5000: false, money10000: false,
+        hack: false, rainylainy: false, lucky20: false, nuggets: false, takis: false, proud: false,
+        danger: false, rescue: false, thief: false, fitness: false, soup: false, nightmare: false
+    };
+
+    let hasImportedInSession = false;
+
+    setTimeout(() => { triggerAchievement("join", "Pou se ha unido a la partida"); }, 1000);
+    updateUI("Elige una puerta para comenzar.");
+
+    function triggerAchievement(id, title) {
+        if (achievements[id]) return;
+        achievements[id] = true;
+        
+        try {
+            let audio = new Audio("https://raw.githubusercontent.com/rainyLoose/PouDoorsGame2.0/audio/achivement.mp3");
+            audio.volume = 0.6;
+            audio.play();
+        } catch(e) {}
+
+        const toast = document.getElementById("steam-notification");
+        document.getElementById("toast-title").innerText = title;
+        toast.classList.add("show");
+
+        setTimeout(() => { toast.classList.remove("show"); }, 4000);
+        updateUI(document.getElementById("game-log").innerText);
+    }
+
+    function toggleTheme() {
+        const body = document.documentElement;
+        const currentTheme = body.getAttribute("data-theme");
+        const btn = document.getElementById("theme-btn");
+
+        if (currentTheme === "dark" || currentTheme === "space" || currentTheme === "aqua") {
+            body.removeAttribute("data-theme");
+            btn.innerText = "Modo Oscuro";
+        } else {
+            body.setAttribute("data-theme", "dark");
+            btn.innerText = "Modo Claro";
+        }
+    }
+
+    function buyTheme(themeName) {
+        if (themeName === 'space' && coinsInventory >= 8 && !unlockedThemes.space) {
+            coinsInventory -= 8; unlockedThemes.space = true;
+            document.documentElement.setAttribute("data-theme", "space");
+            updateUI("¡Desbloqueaste el Tema Espacio Galáctico!");
+        } else if (themeName === 'space' && unlockedThemes.space) {
+            document.documentElement.setAttribute("data-theme", "space");
+        }
+
+        if (themeName === 'aqua' && coinsInventory >= 12 && !unlockedThemes.aqua) {
+            coinsInventory -= 12; unlockedThemes.aqua = true;
+            document.documentElement.setAttribute("data-theme", "aqua");
+            updateUI("¡Desbloqueaste el Tema Aqua Portátil!");
+        } else if (themeName === 'aqua' && unlockedThemes.aqua) {
+            document.documentElement.setAttribute("data-theme", "aqua");
+        }
+        checkMoneyAchievements();
+        updateUI(document.getElementById("game-log").innerText);
+    }
+
+    function buyUpgrade() {
+        if (coinsInventory >= 100 && !hasHungerUpgrade) {
+            coinsInventory -= 100;
+            hasHungerUpgrade = true;
+            maxHunger = 300;
+            updateUI("¡Pou ha mutado! Ahora su máxima capacidad de hambre es 300.");
+            checkMoneyAchievements();
+        }
+    }
+
+    function openDoor(doorNumber) {
+        if (gameOver) return;
+
+        if (hunger < 0) {
+            triggerAchievement("hack", "Archivo Editado Exitosamente");
+            hunger = 0; 
+        }
+
+        let hungerIncrease = (daysSurvived <= 5) ? Math.floor(Math.random() * 25) + 15 :
+                             (daysSurvived <= 14) ? Math.floor(Math.random() * 25) + 20 : 
+                                                    Math.floor(Math.random() * 25) + 25;
+
+        if (hunger >= (maxHunger - 20)) triggerAchievement("danger", "Al Filo del Peligro");
+
+        hunger = Math.min(maxHunger, hunger + hungerIncrease);
+        foodEaten = Math.max(0, foodEaten - 1);
+
+        if (hunger >= maxHunger) {
+            updateUI(`GAME OVER! El hambre llegó al límite en el Día ${daysSurvived}. Pou se desmayó.`);
+            endGame();
+            return;
+        }
+
+        totalDoorsOpened++;
+        let doorsProgress = totalDoorsOpened % 5;
+        if (totalDoorsOpened > 0 && doorsProgress === 0) {
+            daysSurvived++;
+            checkDaysAchievements();
+        }
+
+        let roll = Math.floor(Math.random() * 105); 
+        let message = "";
+
+        if (roll >= 98 && !isRaining) {
+            isRaining = true;
+            triggerAchievement("rainylainy", "RainyLainy Thats The Name");
+            document.getElementById("main-box").classList.add("weather-rainy");
+            message = `Puerta ${doorNumber}: ¡Comenzó a llover fuertemente! La tormenta durará 3 minutos.`;
+            
+            setTimeout(() => {
+                isRaining = false;
+                document.getElementById("main-box").classList.remove("weather-rainy");
+            }, 180000); 
+        }
+        else if (roll < 5) {
+            coinsInventory += 20;
+            triggerAchievement("lucky20", "Suerte, Suerte que Buena Es!");
+            message = `Puerta ${doorNumber}: ¡SÚPER SUERTE! Encontraste una sala llena de oro. ¡+20 Monedas Pou!`;
+        }
+        else if (roll < 10) {
+            hunger = Math.max(0, hunger - 150);
+            triggerAchievement("nuggets", "Nuggets Del PouDonalds");
+            message = `Puerta ${doorNumber}: ¡Pou encontró un empaque de Nuggets de PouDonalds tirado y se los devoró! (-150 Hambre).`;
+        }
+        else if (roll < 14) {
+            takisInventory++;
+            triggerAchievement("takis", "Exceso de Pous Picantes");
+            message = `Puerta ${doorNumber}: ¡Encontraste una bolsa secreta de Takis Pou súper picantes!`;
+        }
+        else if (roll < 22) {
+            timesRobbed++;
+            if (timesRobbed >= 3) triggerAchievement("thief", "Imán de Ladrones");
+            if (burgerInventory > 0 || sandwichInventory > 0) {
+                if (burgerInventory >= sandwichInventory) { burgerInventory--; message = `Puerta ${doorNumber}: ¡Un Ladrón asaltó a Pou y le robó 1 Hamburguesa!`; }
+                else { sandwichInventory--; message = `Puerta ${doorNumber}: ¡Mala suerte! Un Ladrón se llevó 1 Sándwich!`; }
+            } else { message = `Puerta ${doorNumber}: Un Ladrón asaltó a Pou, pero al no ver comida se marchó furioso.`; }
+        }
+        else if (roll < 28) {
+            let relief = Math.floor(maxHunger * 0.30);
+            hunger = Math.max(0, hunger - relief);
+            message = `Puerta ${doorNumber}: ¡Luz mística! Una Puerta Bendecida redujo el hambre un 30%.`;
+        } else if (roll < 45) {
+            burgerInventory++; message = `Puerta ${doorNumber}: Encontraste una Hamburguesa gigante.`;
+        } else if (roll < 65) {
+            sandwichInventory++; message = `Puerta ${doorNumber}: Conseguiste un tierno Sándwich Pou.`;
+        } else if (roll < 72) {
+            soupInventory++; message = `Puerta ${doorNumber}: ¡Has encontrado una mítica Sopa Pou!`;
+        } else {
+            let coinsFound = Math.floor(Math.random() * 4) + 1;
+            coinsInventory += coinsFound;
+            message = `Puerta ${doorNumber}: Encontraste un saco con ${coinsFound} Monedas Pou.`;
+        }
+
+        checkMoneyAchievements();
+        updateUI(message);
+    }
+
+    function feedPou(foodType) {
+        if (gameOver) return;
+
+        if (foodType === 'burger' && burgerInventory > 0) {
+            burgerInventory--; burgersFedCount++; totalBurgersEaten++;
+            foodEaten += 1; hunger = Math.max(0, hunger - 75);
+            var message = `Le diste una hamburguesa. ¡El hambre bajó bastante!`;
+        } else if (foodType === 'sandwich' && sandwichInventory > 0) {
+            sandwichInventory--; totalSandwichesEaten++;
+            foodEaten += 0.5; hunger = Math.max(0, hunger - 30);
+            var message = `Le diste el Sándwich Pou. Bajó un poco el hambre.`;
+        } else if (foodType === 'soup' && soupInventory > 0) {
+            soupInventory--; soupsFedCount++; totalSoupsEaten++;
+            if (soupsFedCount >= 2) triggerAchievement("soup", "Gourmet Legendario");
+            foodEaten += 1.5; hunger = 0;
+            var message = `¡Pou se tomó la Sopa Legendaria! Su barra de hambre está vacía.`;
+        } else if (foodType === 'takis' && takisInventory > 0) {
+            takisInventory--;
+            foodEaten += 1.2; 
+            hunger = Math.max(0, hunger - 100);
+            var message = `¡Pou se comió los Takis Picantes! Le arde la boca pero se llenó bastante.`;
+        } else { return; }
+
+        if (totalSandwichesEaten >= 5 && totalSoupsEaten >= 3 && totalBurgersEaten >= 4) {
+            triggerAchievement("proud", "Pou, ¿estás orgulloso?");
+        }
+
+        if (foodEaten >= MAX_EMPACHO) {
+            message = `GAME OVER! Pou comió demasiado rápido sin digerir. ¡Ha explotado!`;
+            endGame();
+        }
+
+        updateUI(message);
+    }
+
+    function buyItem(itemType) {
+        if (gameOver) return;
+        if (itemType === 'sandwich' && coinsInventory >= 3) {
+            coinsInventory -= 3; sandwichInventory++;
+            updateUI("Compraste 1 Sándwich Pou en la tienda por 3 monedas.");
+        } else if (itemType === 'potion' && coinsInventory >= 5) {
+            coinsInventory -= 5; foodEaten = Math.max(0, foodEaten - 2);
+            updateUI("¡Pou tomó la Poción de Digestión! Su nivel de empacho disminuyó en -2.");
+        }
+        checkMoneyAchievements();
+    }
+
+    function checkDaysAchievements() {
+        if (daysSurvived >= 15) {
+            daysSpentInNightmare++;
+            triggerAchievement("nightmareMode", "Modo Pesadilla Activado");
+            if (daysSpentInNightmare >= 3) triggerAchievement("nightmare", "Sobreviviente Pesadilla");
+        }
+        if (daysSurvived >= 5) {
+            triggerAchievement("days", "Superviviente Nato");
+            if (burgersFedCount === 0) triggerAchievement("fitness", "Pou Fitness");
+        }
+        if (daysSurvived >= 30) triggerAchievement("surv30", "Pousito Sobreviviente Extremo");
+        if (daysSurvived >= 50) triggerAchievement("surv50", "Pou Sobreviviente de puertas");
+        if (daysSurvived >= 100) triggerAchievement("surv100", "Como llegamos a esto?");
+        if (daysSurvived >= 300) triggerAchievement("surv300", "Pou Po Pou!");
+        if (daysSurvived >= 500) triggerAchievement("surv500", "DAME MAS DIAS MAS DIAS MAS DIAS");
+        if (daysSurvived >= 1000) triggerAchievement("surv1000", "El final");
+    }
+
+    /* 🧱 FIX 2: REVISIÓN DE LOGROS POR ACUMULACIÓN EN ESCALA */
+    function checkMoneyAchievements() {
+        if (coinsInventory >= 15) triggerAchievement("coins", "Pou Magnate");
+        if (coinsInventory >= 100) triggerAchievement("money100", "100 - Pou Dineroso");
+        if (coinsInventory >= 500) triggerAchievement("money500", "500 - Lluvia de billetes con forma de pou");
+        if (coinsInventory >= 1000) triggerAchievement("money1000", "1000 - esto se sale de control");
+        if (coinsInventory >= 2000) triggerAchievement("money2000", "2000 - Pou comprame deltarune y el gta 6");
+        if (coinsInventory >= 5000) triggerAchievement("money5000", "5000 - Pou creo que tenemos un poco mucho de dinero");
+        if (coinsInventory >= 10000) triggerAchievement("money10000", "10000 - Es un Sueño!!!!");
+    }
+
+    function updateUI(message) {
+        document.getElementById("hunger-text").innerText = hunger;
+        document.getElementById("max-hunger-text").innerText = maxHunger;
+        document.getElementById("empacho-text").innerText = foodEaten;
+        document.getElementById("burger-text").innerText = burgerInventory;
+        document.getElementById("sandwich-text").innerText = sandwichInventory;
+        document.getElementById("soup-text").innerText = soupInventory;
+        document.getElementById("takis-text").innerText = takisInventory;
+        document.getElementById("coins-text").innerText = coinsInventory;
+        document.getElementById("game-log").innerText = message;
+
+        let doorsProgress = totalDoorsOpened % 5;
+        document.getElementById("days-box").innerText = `Dias Sobrevividos: ${daysSurvived} (Puertas: ${doorsProgress}/5)`;
+        
+        const diffBox = document.getElementById("difficulty-box");
+        if (daysSurvived <= 5) { diffBox.innerText = "Dificultad: Fácil (Hambre normal)"; diffBox.style.color = "#4caf50"; }
+        else if (daysSurvived <= 14) { diffBox.innerText = "Dificultad: Media (Hambre aumentada)"; diffBox.style.color = "#ff9f1c"; }
+        else { diffBox.innerText = "Dificultad: ¡PESADILLA! (Hambre extrema y ladrones)"; diffBox.style.color = "#e63946"; }
+
+        let hungerPct = Math.max(0, (hunger / maxHunger) * 100);
+        let empachoPct = (foodEaten / MAX_EMPACHO) * 100;
+
+        const hungerBar = document.getElementById("hunger-bar");
+        const empachoBar = document.getElementById("empacho-bar");
+        
+        hungerBar.style.width = hungerPct + "%";
+        empachoBar.style.width = empachoPct + "%";
+
+        /* 🧱 FIX 1: CAMBIO DE COLOR DE LA BARRA CUANDO POU MUERE */
+        if (gameOver && hunger >= maxHunger) {
+            hungerBar.style.backgroundColor = "#e63946"; 
+        } else {
+            hungerBar.style.backgroundColor = "#4caf50";
+        }
+
+        const takisBox = document.getElementById("takis-box");
+        const feedTakisBtn = document.getElementById("feed-takis");
+        if (achievements.takis || takisInventory > 0) {
+            takisBox.style.display = "inline-block";
+            feedTakisBtn.style.display = "inline-block";
+        } else {
+            takisBox.style.display = "none";
+            feedTakisBtn.style.display = "none";
+        }
+
+        document.getElementById("feed-burger").disabled = (burgerInventory <= 0 || gameOver);
+        document.getElementById("feed-sandwich").disabled = (sandwichInventory <= 0 || gameOver);
+        document.getElementById("feed-soup").disabled = (soupInventory <= 0 || gameOver);
+        document.getElementById("feed-takis").disabled = (takisInventory <= 0 || gameOver);
+        
+        document.getElementById("buy-sandwich").disabled = (coinsInventory < 3 || gameOver);
+        document.getElementById("buy-potion").disabled = (coinsInventory < 5 || gameOver);
+        
+        /* 🧱 FIX 3: RECTIFICACIÓN DEL ESTADO DEL BOTÓN DEL MEGA ESTÓMAGO */
+        document.getElementById("buy-upgrade").disabled = (coinsInventory < 100 || hasHungerUpgrade || gameOver);
+
+        // Deshabilitar cosméticos si ya se compraron o no hay dinero
+        document.getElementById("buy-theme-space").disabled = (unlockedThemes.space || coinsInventory < 8 || gameOver);
+        document.getElementById("buy-theme-aqua").disabled = (unlockedThemes.aqua || coinsInventory < 12 || gameOver);
+        
+        for (let key in achievements) {
+            let el = document.getElementById(`ach-${key.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`);
+            if (!el) el = document.getElementById(`ach-${key}`);
+            if (el) {
+                if (achievements[key]) {
+                    el.classList.add("unlocked");
+                    el.querySelector(".ach-badge").innerText = "🏆";
+                } else {
+                    el.classList.remove("unlocked");
+                    el.querySelector(".ach-badge").innerText = "🔒";
+                }
+            }
+        }
+
+        const importLabel = document.getElementById("import-label");
+        if (gameOver) { importLabel.classList.add("disabled-btn"); importLabel.innerText = "🔒 Bloqueado (Pou Murió)"; }
+        else if (hasImportedInSession) { importLabel.classList.add("disabled-btn"); importLabel.innerText = "🔒 Sesión cargada"; }
+        else { importLabel.classList.remove("disabled-btn"); importLabel.innerText = "📁 Importar (.pou)"; }
+    }
+
+    function exportGame() {
+        if (gameOver) return;
+        let itemsList = [];
+        for(let i=0; i<burgerInventory; i++) itemsList.push("Hamburgesa");
+        for(let i=0; i<sandwichInventory; i++) itemsList.push("Sandwich");
+        for(let i=0; i<soupInventory; i++) itemsList.push("Sopa");
+        for(let i=0; i<takisInventory; i++) itemsList.push("Takis");
+        if (unlockedThemes.aqua) itemsList.push("Aqua");
+        if (unlockedThemes.space) itemsList.push("Espacio");
+        if (hasHungerUpgrade) itemsList.push("UpgradeEstomago");
+
+        let currentActiveTheme = document.documentElement.getAttribute("data-theme") || "clasico";
+        let achBits = Object.keys(achievements).map(k => `${k}:${achievements[k]?'1':'0'}`).join(",");
+
+        let textContent = `Estadísticas de la partida Pou 3.0:\n`;
+        textContent += `Hambre: ${hunger}/${maxHunger}\n`;
+        textContent += `Empacho: ${foodEaten}/${MAX_EMPACHO}\n`;
+        textContent += `Dias: ${daysSurvived}\n`;
+        textContent += `PuertasTotales: ${totalDoorsOpened}\n`;
+        textContent += `Monedas: ${coinsInventory}\n`;
+        textContent += `TemaActivo: ${currentActiveTheme}\n`;
+        textContent += `Items: ${itemsList.join(" ")}\n`;
+        textContent += `LogrosMapeados: ${achBits}\n`;
+        textContent += `ContadoresAvanzados: ${timesRobbed} ${burgersFedCount} ${soupsFedCount} ${daysSpentInNightmare} ${totalBurgersEaten} ${totalSandwichesEaten} ${totalSoupsEaten}`;
+
+        let blob = new Blob([textContent], { type: "application/octet-stream" });
+        let link = document.createElement("a");
+        link.download = "poudoorgame_v3.pou";
+        link.href = window.URL.createObjectURL(blob);
+        link.click();
+        window.URL.revokeObjectURL(link.href);
+    }
+
+    function importGame(event) {
+        if (gameOver || hasImportedInSession) return;
+        let file = event.target.files[0];
+        if (!file) return;
+
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            let content = e.target.result;
+            let lines = content.split("\n");
+            
+            burgerInventory = 0; sandwichInventory = 0; soupInventory = 0; takisInventory = 0;
+            unlockedThemes.aqua = false; unlockedThemes.space = false; hasHungerUpgrade = false;
+
+            try {
+                lines.forEach(line => {
+                    if (line.startsWith("Hambre:")) {
+                        let parts = line.replace("Hambre: ", "").split("/");
+                        hunger = parseInt(parts[0]); maxHunger = parseInt(parts[1]);
+                    } else if (line.startsWith("Empacho:")) {
+                        foodEaten = parseFloat(line.replace("Empacho: ", "").split("/")[0]);
+                    } else if (line.startsWith("Dias:")) {
+                        daysSurvived = parseInt(line.replace("Dias: ", ""));
+                    } else if (line.startsWith("PuertasTotales:")) {
+                        totalDoorsOpened = parseInt(line.replace("PuertasTotales: ", ""));
+                    } else if (line.startsWith("Monedas:")) {
+                        coinsInventory = parseInt(line.replace("Monedas: ", ""));
+                    } else if (line.startsWith("LogrosMapeados:")) {
+                        let pairs = line.replace("LogrosMapeados: ", "").trim().split(",");
+                        pairs.forEach(p => {
+                            let [k, v] = p.split(":");
+                            if(k in achievements) achievements[k] = (v === "1");
+                        });
+                    } else if (line.startsWith("ContadoresAvanzados:")) {
+                        let bits = line.replace("ContadoresAvanzados: ", "").trim().split(" ");
+                        timesRobbed = parseInt(bits[0]) || 0;
+                        burgersFedCount = parseInt(bits[1]) || 0;
+                        soupsFedCount = parseInt(bits[2]) || 0;
+                        daysSpentInNightmare = parseInt(bits[3]) || 0;
+                        totalBurgersEaten = parseInt(bits[4]) || 0;
+                        totalSandwichesEaten = parseInt(bits[5]) || 0;
+                        totalSoupsEaten = parseInt(bits[6]) || 0;
+                    } else if (line.startsWith("Items:")) {
+                        let items = line.replace("Items: ", "").trim().split(" ");
+                        items.forEach(it => {
+                            if (it === "Hamburgesa") burgerInventory++;
+                            if (it === "Sandwich") sandwichInventory++;
+                            if (it === "Sopa") soupInventory++;
+                            if (it === "Takis") takisInventory++;
+                            if (it === "Aqua") unlockedThemes.aqua = true;
+                            if (it === "Espacio") unlockedThemes.space = true;
+                            if (it === "UpgradeEstomago") hasHungerUpgrade = true;
+                        });
+                    }
+                });
+
+                hasImportedInSession = true;
+                
+                // Forzar re-evaluación en cascada de los logros de dinero al importar
+                checkMoneyAchievements();
+                
+                updateUI("¡Partida cargada de forma segura!");
+            } catch(err) { alert("Error al leer tu archivo .pou"); }
+        };
+        reader.readAsText(file);
+    }
+
+    function endGame() {
+        gameOver = true;
+        document.getElementById("game-actions").style.opacity = "0.4";
+        document.getElementById("door-1").disabled = true;
+        document.getElementById("door-2").disabled = true;
+        document.getElementById("door-3").disabled = true;
+        document.getElementById("export-btn").disabled = true;
+        document.getElementById("reset-btn").style.display = "inline-block";
+        updateUI(document.getElementById("game-log").innerText);
+    }
+
+    function resetGame() {
+        maxHunger = 250; hunger = 125; burgerInventory = 0; sandwichInventory = 0; soupInventory = 0; takisInventory = 0; coinsInventory = 0; foodEaten = 0; totalDoorsOpened = 0; daysSurvived = 0;
+        gameOver = false; hasHungerUpgrade = false; hasImportedInSession = false; totalBurgersEaten = 0; totalSandwichesEaten = 0; totalSoupsEaten = 0; timesRobbed = 0; burgersFedCount = 0; soupsFedCount = 0; daysSpentInNightmare = 0;
+        document.documentElement.removeAttribute("data-theme");
+        document.getElementById("game-actions").style.opacity = "1";
+        document.getElementById("reset-btn").style.display = "none";
+        document.getElementById("door-1").disabled = false; document.getElementById("door-2").disabled = false; document.getElementById("door-3").disabled = false; document.getElementById("export-btn").disabled = false;
+        
+        for (let k in achievements) achievements[k] = false;
+        triggerAchievement("join", "Pou se ha unido a la partida");
+        updateUI("¡Juego reiniciado por completo!");
+    }
+</script>
+
+</body>
+</html>
             color: var(--text-title);
             margin-bottom: 5px;
             font-size: 24pt;
