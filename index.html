@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pou Door Survivor - Deluxe Save Update</title>
+    <title>Pou Doors Game 2.0</title>
     <style>
         *, *::before, *::after {
             box-sizing: border-box;
@@ -124,7 +124,7 @@
         .file-label-btn.disabled-btn {
             background-color: #cccccc !important;
             color: #888888 !important;
-            cursor: not-allowed;
+            cursor: not-allowed !important;
         }
         [data-theme="dark"] .file-label-btn.disabled-btn { background-color: #444444 !important; color: #777777 !important; }
 
@@ -138,6 +138,12 @@
             font-weight: bold;
             cursor: pointer;
         }
+        .export-btn:disabled {
+            background-color: #cccccc !important;
+            color: #888888 !important;
+            cursor: not-allowed !important;
+        }
+        [data-theme="dark"] .export-btn:disabled { background-color: #444444 !important; color: #777777 !important; }
         
         .days-counter {
             background: #e63946;
@@ -252,6 +258,8 @@
             transition: transform 0.1s;
         }
         .door-btn:hover { background-color: #1c2541; transform: translateY(-2px); }
+        .door-btn:disabled { background-color: #cccccc; cursor: not-allowed; transform: none; color: #888888; }
+        [data-theme="dark"] .door-btn:disabled { background-color: #444444; color: #777777; }
 
         .game-section-box {
             margin: 20px 0;
@@ -311,21 +319,23 @@
             text-align: left;
         }
         .ach-grid {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 8px;
             margin-top: 10px;
         }
+        @media(max-width: 500px) { .ach-grid { grid-template-columns: 1fr; } }
+        
         .ach-item {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 10pt;
+            font-size: 9pt;
             color: #888888;
             font-weight: 500;
         }
         .ach-item.unlocked { color: var(--text-main); font-weight: bold; }
-        .ach-badge { width: 16px; height: 16px; border-radius: 50%; background-color: #dddddd; display: inline-block; }
+        .ach-badge { width: 14px; height: 14px; border-radius: 50%; background-color: #dddddd; display: inline-block; flex-shrink: 0; }
         .ach-item.unlocked .ach-badge { background-color: #00f5d4; box-shadow: 0 0 8px #00f5d4; }
 
         .reset-btn {
@@ -340,6 +350,46 @@
             margin-top: 15px;
             display: none;
         }
+
+        /* 👑 NOTIFICACIÓN ESTILO STEAM */
+        .steam-toast {
+            position: fixed;
+            bottom: -100px;
+            right: 20px;
+            background: #171a21;
+            color: #c6d4df;
+            border: 2px solid #c7931c;
+            border-radius: 4px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-align: left;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            z-index: 9999;
+            width: 320px;
+            transition: bottom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .steam-toast.show {
+            bottom: 20px;
+        }
+        .steam-toast-icon {
+            font-size: 24pt;
+            color: #ffb800;
+            line-height: 1;
+        }
+        .steam-toast-content h4 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 10pt;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .steam-toast-content p {
+            margin: 3px 0 0 0;
+            font-size: 9pt;
+            color: #8f98a0;
+        }
     </style>
 </head>
 <body>
@@ -347,7 +397,7 @@
 <div class="game-container">
     <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">Modo Oscuro</button>
 
-    <h1>Pou Door Survivor</h1>
+    <h1>Pou Doors Game 2.0</h1>
     <p class="subtitle">Explora con cuidado y cuida bien a Pou</p>
 
     <!-- SISTEMA DE PARTIDAS EXPORTAR/IMPORTAR (.pou) -->
@@ -356,7 +406,7 @@
             <label for="import-file" class="file-label-btn" id="import-label">📁 Importar (.pou)</label>
             <input type="file" id="import-file" accept=".pou" style="display: none;" onchange="importGame(event)">
         </div>
-        <button class="export-btn" onclick="exportGame()">💾 Exportar (.pou)</button>
+        <button class="export-btn" id="export-btn" onclick="exportGame()">💾 Exportar (.pou)</button>
     </div>
     
     <div class="days-counter" id="days-box">Dias Sobrevividos: 0 (Puertas: 0/5)</div>
@@ -397,9 +447,9 @@
     <div id="game-actions">
         <h3 style="font-size: 11pt; margin-bottom: 5px; text-align: left;">1. Explorar puertas:</h3>
         <div class="doors-container">
-            <button class="door-btn" onclick="openDoor(1)">Puerta 1</button>
-            <button class="door-btn" onclick="openDoor(2)">Puerta 2</button>
-            <button class="door-btn" onclick="openDoor(3)">Puerta 3</button>
+            <button class="door-btn" id="door-1" onclick="openDoor(1)">Puerta 1</button>
+            <button class="door-btn" id="door-2" onclick="openDoor(2)">Puerta 2</button>
+            <button class="door-btn" id="door-3" onclick="openDoor(3)">Puerta 3</button>
         </div>
 
         <div class="game-section-box feed-section">
@@ -431,10 +481,24 @@
     <div class="achievements-section">
         <h3 style="font-size: 11pt; margin: 0;">🏆 Logros de la Partida:</h3>
         <div class="ach-grid">
-            <div class="ach-item" id="ach-days"><span class="ach-badge"></span> Superviviente Nato (Llega al Dia 5)</div>
-            <div class="ach-item" id="ach-coins"><span class="ach-badge"></span> Pou Magnate (Junta 15 Monedas Pou)</div>
-            <div class="ach-item" id="ach-danger"><span class="ach-badge"></span> Al Filo del Peligro (Sobrevive con Hambre > 230)</div>
+            <div class="ach-item" id="ach-days"><span class="ach-badge"></span> Superviviente Nato (Dia 5)</div>
+            <div class="ach-item" id="ach-coins"><span class="ach-badge"></span> Pou Magnate (15 Monedas)</div>
+            <div class="ach-item" id="ach-danger"><span class="ach-badge"></span> Al Filo del Peligro (Hambre > 230)</div>
+            <div class="ach-item" id="ach-rescue"><span class="ach-badge"></span> Rescate Milagroso (Niebla oportuna)</div>
+            <div class="ach-item" id="ach-thief"><span class="ach-badge"></span> Iman de Ladrones (Robado 3 veces)</div>
+            <div class="ach-item" id="ach-fitness"><span class="ach-badge"></span> Pou Fitness (Dia 5 sin Burger)</div>
+            <div class="ach-item" id="ach-soup"><span class="ach-badge"></span> Gourmet Legendario (2 Sopas Pou)</div>
+            <div class="ach-item" id="ach-nightmare"><span class="ach-badge"></span> Sobreviviente Pesadilla (3 dias en Psd)</div>
         </div>
+    </div>
+</div>
+
+<!-- ELEMENTO FLOTANTE DE NOTIFICACIÓN DE LOGRO -->
+<div id="steam-notification" class="steam-toast">
+    <div class="steam-toast-icon">🏆</div>
+    <div class="steam-toast-content">
+        <h4>Logro desbloqueado</h4>
+        <p id="toast-title">Nombre del logro</p>
     </div>
 </div>
 
@@ -455,12 +519,48 @@
 
     let unlockedThemes = { space: false, aqua: false };
     let hasHungerUpgrade = false;
-    let achievements = { days: false, coins: false, danger: false };
+    
+    // Variables contadoras de logros específicos
+    let timesRobbed = 0;
+    let burgersFedCount = 0;
+    let soupsFedCount = 0;
+    let daysSpentInNightmare = 0;
 
-    // Variable de control para el candado de importación única
+    // Estado global de logros
+    let achievements = {
+        days: false, coins: false, danger: false, rescue: false,
+        thief: false, fitness: false, soup: false, nightmare: false
+    };
+
     let hasImportedInSession = false;
 
     updateUI("Elige una puerta para comenzar.");
+
+    function triggerAchievement(id, title) {
+        if (achievements[id]) return; // Si ya se tiene, ignorar
+        
+        achievements[id] = true;
+        
+        // Lanzar sonido nativo usando la URL directa (raw) de tu repo
+        try {
+            let audio = new Audio("https://raw.githubusercontent.com/rainyLoose/PouDoorsGame2.0/audio/achivement.mp3");
+            audio.volume = 0.6;
+            audio.play();
+        } catch(e) {
+            console.log("El navegador bloqueó el audio automático hasta que interactúes con la página.");
+        }
+
+        // Mostrar el Toast estilo Steam
+        const toast = document.getElementById("steam-notification");
+        document.getElementById("toast-title").innerText = title;
+        toast.classList.add("show");
+
+        setTimeout(() => {
+            toast.classList.remove("show");
+        }, 4000);
+
+        updateUI(document.getElementById("game-log").innerText);
+    }
 
     function toggleTheme() {
         const body = document.documentElement;
@@ -520,10 +620,12 @@
             hungerIncrease = Math.floor(Math.random() * 25) + 25;
         }
 
+        // Chequeo logro: "Al Filo del Peligro"
         if (hunger >= (maxHunger - 20)) {
-            achievements.danger = true;
+            triggerAchievement("danger", "Al Filo del Peligro");
         }
 
+        let preDoorHunger = hunger; // Guardamos para validar rescate milagroso
         hunger = Math.min(maxHunger, hunger + hungerIncrease);
         foodEaten = Math.max(0, foodEaten - 1);
 
@@ -537,7 +639,21 @@
         let doorsProgress = totalDoorsOpened % 5;
         if (totalDoorsOpened > 0 && doorsProgress === 0) {
             daysSurvived++;
-            if (daysSurvived >= 5) achievements.days = true;
+            
+            // Lógica interna para contar días sobrevividos en Modo Pesadilla
+            if (daysSurvived >= 15) {
+                daysSpentInNightmare++;
+                if (daysSpentInNightmare >= 3) {
+                    triggerAchievement("nightmare", "Sobreviviente Pesadilla");
+                }
+            }
+
+            if (daysSurvived >= 5) {
+                triggerAchievement("days", "Superviviente Nato");
+                if (burgersFedCount === 0) {
+                    triggerAchievement("fitness", "Pou Fitness");
+                }
+            }
         }
 
         let roll = Math.floor(Math.random() * 100);
@@ -548,6 +664,9 @@
         let message = "";
 
         if (roll < 8) {
+            timesRobbed++;
+            if (timesRobbed >= 3) triggerAchievement("thief", "Imán de Ladrones");
+
             if (burgerInventory > 0 || sandwichInventory > 0) {
                 if (burgerInventory >= sandwichInventory && burgerInventory > 0) {
                     burgerInventory--;
@@ -567,8 +686,14 @@
             coinsInventory += 2;
             message = `Puerta ${doorNumber}: Un Pou amigo aparecio y te regalo 2 Monedas Pou de la buena suerte! (+${hungerIncrease} hambre).`;
         } else if (roll < 27) {
+            // Re-calcular hambre para el evento Niebla Densa
             hunger = Math.max(0, hunger - hungerIncrease + 5);
             message = `Puerta ${doorNumber}: Una densa niebla bloqueo el camino. Pou descansó y apenas gasto hambre (+5 hambre).`;
+            
+            // Chequeo logro: "Rescate Milagroso" (Iba a morir con el coste base pero la niebla lo salvó)
+            if (preDoorHunger + hungerIncrease >= maxHunger) {
+                triggerAchievement("rescue", "Rescate Milagroso");
+            }
         } else if (roll < 32) {
             coinsInventory += 6;
             message = `Puerta ${doorNumber}: ¡Increible! Pou descubrio un Cofre Escondido con 6 Monedas Pou! (+${hungerIncrease} hambre).`;
@@ -587,7 +712,9 @@
             message = `Puerta ${doorNumber}: Encontraste un saco con ${coinsFound} Monedas Pou! (+${hungerIncrease} hambre).`;
         }
 
-        if (coinsInventory >= 15) achievements.coins = true;
+        if (coinsInventory >= 15) {
+            triggerAchievement("coins", "Pou Magnate");
+        }
 
         updateUI(message);
     }
@@ -597,6 +724,7 @@
 
         if (foodType === 'burger' && burgerInventory > 0) {
             burgerInventory--;
+            burgersFedCount++;
             foodEaten += 1;
             hunger = Math.max(0, hunger - 75);
             var message = `Le diste una hamburguesa. El hambre bajo bastante!`;
@@ -607,6 +735,9 @@
             var message = `Le diste el Sandwich Pou. Bajo un poco el hambre.`;
         } else if (foodType === 'soup' && soupInventory > 0) {
             soupInventory--;
+            soupsFedCount++;
+            if (soupsFedCount >= 2) triggerAchievement("soup", "Gourmet Legendario");
+            
             foodEaten += 1.5;
             hunger = 0;
             var message = `Pou se tomo la Sopa Legendaria! Su barra de hambre esta vacia.`;
@@ -711,15 +842,24 @@
             btnAqua.disabled = (coinsInventory < 12 || gameOver);
         }
 
+        // Iluminación de Logros en la cuadrícula inferior
         if (achievements.days) document.getElementById("ach-days").classList.add("unlocked");
         if (achievements.coins) document.getElementById("ach-coins").classList.add("unlocked");
         if (achievements.danger) document.getElementById("ach-danger").classList.add("unlocked");
+        if (achievements.rescue) document.getElementById("ach-rescue").classList.add("unlocked");
+        if (achievements.thief) document.getElementById("ach-thief").classList.add("unlocked");
+        if (achievements.fitness) document.getElementById("ach-fitness").classList.add("unlocked");
+        if (achievements.soup) document.getElementById("ach-soup").classList.add("unlocked");
+        if (achievements.nightmare) document.getElementById("ach-nightmare").classList.add("unlocked");
         
-        // Manejo visual del botón de Importar cuando se bloquea
+        // Manejo visual del botón de Importar
         const importLabel = document.getElementById("import-label");
-        if (hasImportedInSession) {
+        if (gameOver) {
             importLabel.classList.add("disabled-btn");
-            importLabel.innerText = "🔒 Archivo Cargado (Exporta para liberar)";
+            importLabel.innerText = "🔒 Bloqueado (Pou Murió)";
+        } else if (hasImportedInSession) {
+            importLabel.classList.add("disabled-btn");
+            importLabel.innerText = "🔒 Sesión cargada";
         } else {
             importLabel.classList.remove("disabled-btn");
             importLabel.innerText = "📁 Importar (.pou)";
@@ -736,8 +876,10 @@
         }
     }
 
-    /* 💾 EXPORTAR SISTEMA .POU */
+    /* 💾 EXPORTAR SISTEMA .POU (PARCHADO CONTRA CADÁVERES) */
     function exportGame() {
+        if (gameOver) return; // Parche extra redundante de seguridad en JS
+
         let itemsList = [];
         for(let i=0; i<burgerInventory; i++) itemsList.push("Hamburgesa");
         for(let i=0; i<sandwichInventory; i++) itemsList.push("Sandwich");
@@ -749,6 +891,9 @@
 
         let currentActiveTheme = document.documentElement.getAttribute("data-theme") || "clasico";
 
+        // Convertir estado de logros a string binario para guardar
+        let achString = `${achievements.days?'1':'0'} ${achievements.coins?'1':'0'} ${achievements.danger?'1':'0'} ${achievements.rescue?'1':'0'} ${achievements.thief?'1':'0'} ${achievements.fitness?'1':'0'} ${achievements.soup?'1':'0'} ${achievements.nightmare?'1':'0'}`;
+
         let textContent = `Estadísticas de la partida:\n`;
         textContent += `Hambre: ${hunger}/${maxHunger}\n`;
         textContent += `Empacho: ${foodEaten}/${MAX_EMPACHO}\n`;
@@ -757,7 +902,8 @@
         textContent += `Monedas: ${coinsInventory}\n`;
         textContent += `TemaActivo: ${currentActiveTheme}\n`;
         textContent += `Items: ${itemsList.join(" ")}\n`;
-        textContent += `Logros: ${achievements.days ? "1" : "0"} ${achievements.coins ? "1" : "0"} ${achievements.danger ? "1" : "0"}`;
+        textContent += `Logros: ${achString}\n`;
+        textContent += `ContadoresInternos: ${timesRobbed} ${burgersFedCount} ${soupsFedCount} ${daysSpentInNightmare}`;
 
         let blob = new Blob([textContent], { type: "application/octet-stream" });
         let link = document.createElement("a");
@@ -766,19 +912,16 @@
         link.click();
         window.URL.revokeObjectURL(link.href);
 
-        // Al exportar la partida actual, se rehabilita la opción de volver a importar si el jugador quiere cambiar de partida
         if (hasImportedInSession) {
             hasImportedInSession = false;
-            updateUI("Partida guardada. ¡Se ha vuelto a habilitar el lector de archivos!");
+            updateUI("Partida guardada de forma segura. ¡Lector de archivos liberado!");
         }
     }
 
     /* 📁 IMPORTAR SISTEMA .POU */
     function importGame(event) {
-        // Bloqueo estricto: Si ya importó una vez, no hace nada
-        if (hasImportedInSession) {
-            alert("Ya importaste una partida en esta sesión. Exporta tu progreso actual antes de cargar otro archivo.");
-            event.target.value = ""; // Limpiar el input
+        if (gameOver || hasImportedInSession) {
+            event.target.value = "";
             return;
         }
 
@@ -816,10 +959,21 @@
                         if (t !== "clasico") document.documentElement.setAttribute("data-theme", t);
                         else document.documentElement.removeAttribute("data-theme");
                     } else if (line.startsWith("Logros:")) {
-                        let logBits = line.replace("Logros: ", "").trim().split(" ");
-                        achievements.days = logBits[0] === "1";
-                        achievements.coins = logBits[1] === "1";
-                        achievements.danger = logBits[2] === "1";
+                        let bits = line.replace("Logros: ", "").trim().split(" ");
+                        achievements.days = bits[0] === "1";
+                        achievements.coins = bits[1] === "1";
+                        achievements.danger = bits[2] === "1";
+                        achievements.rescue = bits[3] === "1";
+                        achievements.thief = bits[4] === "1";
+                        achievements.fitness = bits[5] === "1";
+                        achievements.soup = bits[6] === "1";
+                        achievements.nightmare = bits[7] === "1";
+                    } else if (line.startsWith("ContadoresInternos:")) {
+                        let cBits = line.replace("ContadoresInternos: ", "").trim().split(" ");
+                        timesRobbed = parseInt(cBits[0]) || 0;
+                        burgersFedCount = parseInt(cBits[1]) || 0;
+                        soupsFedCount = parseInt(cBits[2]) || 0;
+                        daysSpentInNightmare = parseInt(cBits[3]) || 0;
                     } else if (line.startsWith("Items:")) {
                         let items = line.replace("Items: ", "").trim().split(" ");
                         items.forEach(it => {
@@ -834,20 +988,17 @@
                 });
 
                 gameOver = false;
-                hasImportedInSession = true; // Candado activado con éxito
+                hasImportedInSession = true; 
                 
                 document.getElementById("game-actions").style.opacity = "1";
                 document.getElementById("reset-btn").style.display = "none";
                 
-                document.getElementById("ach-days").classList.remove("unlocked");
-                document.getElementById("ach-coins").classList.remove("unlocked");
-                document.getElementById("ach-danger").classList.remove("unlocked");
-
-                updateUI("¡Partida cargada! El cargador de archivos se ha bloqueado para evitar abusos.");
+                // Forzar refresco de las clases visuales de los logros cargados
+                updateUI("¡Carga completada! El cargador de partidas se bloqueó por seguridad.");
             } catch(err) {
-                alert("Error al leer el archivo .pou. Revisa que no esté corrupto.");
+                alert("Error al procesar el archivo .pou.");
             }
-            event.target.value = ""; // Reset del input
+            event.target.value = "";
         };
         reader.readAsText(file);
     }
@@ -855,6 +1006,15 @@
     function endGame() {
         gameOver = true;
         document.getElementById("game-actions").style.opacity = "0.4";
+        
+        // Bloquear estrictamente las interacciones de los botones de puertas
+        document.getElementById("door-1").disabled = true;
+        document.getElementById("door-2").disabled = true;
+        document.getElementById("door-3").disabled = true;
+
+        // Desactivar totalmente el botón de exportar
+        document.getElementById("export-btn").disabled = true;
+
         document.getElementById("feed-burger").disabled = true;
         document.getElementById("feed-sandwich").disabled = true;
         document.getElementById("feed-soup").disabled = true;
@@ -864,6 +1024,9 @@
         document.getElementById("buy-theme-aqua").disabled = true;
         document.getElementById("buy-upgrade").disabled = true;
         document.getElementById("reset-btn").style.display = "inline-block";
+        
+        // Ejecutar updateUI final para pintar los cambios de bloqueo de importación
+        updateUI(document.getElementById("game-log").innerText);
     }
 
     function resetGame() {
@@ -878,17 +1041,32 @@
         daysSurvived = 0;
         gameOver = false;
         hasHungerUpgrade = false;
-        hasImportedInSession = false; // Reset completo
+        hasImportedInSession = false;
+        
+        timesRobbed = 0;
+        burgersFedCount = 0;
+        soupsFedCount = 0;
+        daysSpentInNightmare = 0;
+
         unlockedThemes = { space: false, aqua: false };
         document.documentElement.removeAttribute("data-theme");
         
         document.getElementById("game-actions").style.opacity = "1";
         document.getElementById("reset-btn").style.display = "none";
         
-        achievements = { days: false, coins: false, danger: false };
-        document.getElementById("ach-days").classList.remove("unlocked");
-        document.getElementById("ach-coins").classList.remove("unlocked");
-        document.getElementById("ach-danger").classList.remove("unlocked");
+        document.getElementById("door-1").disabled = false;
+        document.getElementById("door-2").disabled = false;
+        document.getElementById("door-3").disabled = false;
+        document.getElementById("export-btn").disabled = false;
+
+        achievements = {
+            days: false, coins: false, danger: false, rescue: false,
+            thief: false, fitness: false, soup: false, nightmare: false
+        };
+        
+        // Quitar clases visuales antiguas
+        const allAchItems = document.querySelectorAll(".ach-item");
+        allAchItems.forEach(item => item.classList.remove("unlocked"));
 
         updateUI("¡Juego reiniciado por completo!");
     }
