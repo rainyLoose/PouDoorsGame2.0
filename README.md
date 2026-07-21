@@ -1,5 +1,0 @@
-# PouDoorsGame2.0
-just a normal game
-
-
-PLEASE DONT GIVE YOU OP STATS. PLS, THE GAME IS MEANT TO BE JUST SAVE SYSTEM
