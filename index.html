@@ -3,197 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PouDoorsGame 2.0 - Versión 4.0</title>
-  
+  <title>PouDoorsGame 2.0</title>
   <style>
-    /* ==========================================
-       🎨 ESTILOS MODERNOS (CSS)
-       ========================================== */
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1e1e2f, #111119);
-      color: #fff;
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-      min-height: 100vh;
-    }
+    body { font-family: sans-serif; background: #121219; color: #fff; text-align: center; margin: 0; padding: 15px; }
+    .pantalla { display: none; }
+    .pantalla.activa { display: block; }
+    button { background: #6c5ce7; color: white; border: none; padding: 10px 18px; margin: 5px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+    
+    .barra-contenedor { width: 80%; max-width: 300px; background: #2a2a3d; height: 16px; margin: 5px auto 12px; border-radius: 8px; overflow: hidden; }
+    .b-miedo { width: 0%; height: 100%; background: #9b59b6; }
+    .b-humedad { width: 0%; height: 100%; background: #3498db; }
+    .b-hambre { width: 100%; height: 100%; background: #e67e22; }
+    .b-empapacho { width: 0%; height: 100%; background: #2ecc71; }
 
-    h1 { 
-      font-size: 2.2rem; 
-      margin-bottom: 20px;
-      text-shadow: 0 4px 10px rgba(0,0,0,0.5); 
-    }
-
-    .pantalla { 
-      display: none; 
-      padding: 20px; 
-      animation: fadeIn 0.3s ease-in-out; 
-    }
-    .pantalla.activa { 
-      display: block; 
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Botones Pro */
-    button {
-      background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      margin: 6px;
-      font-size: 1rem;
-      font-weight: bold;
-      border-radius: 12px;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
-      transition: transform 0.2s, background 0.2s;
-    }
-
-    button:active { 
-      transform: scale(0.95); 
-    }
-
-    .btn-volver {
-      position: absolute; 
-      top: 15px; 
-      left: 15px;
-      background: #444; 
-      font-size: 18px; 
-      padding: 8px 14px;
-      box-shadow: none;
-    }
-
-    /* Barras de Estado */
-    .barra-contenedor {
-      width: 80%; 
-      max-width: 320px;
-      background: #2a2a3d; 
-      height: 18px;
-      margin: 8px auto 20px; 
-      border-radius: 10px;
-      overflow: hidden; 
-      border: 1px solid #444;
-    }
-    .barra-miedo { width: 0%; height: 100%; background: #9b59b6; transition: width 0.4s; }
-    .barra-humedad { width: 0%; height: 100%; background: #3498db; transition: width 0.4s; }
-
-    /* Panel de Audio */
-    .panel-audio {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      padding: 20px; 
-      border-radius: 16px;
-      display: inline-block; 
-      margin-top: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    }
-
-    .grid-tienda { 
-      display: flex; 
-      flex-wrap: wrap; 
-      justify-content: center; 
-      gap: 12px; 
-      margin-top: 20px; 
-    }
-    .item-card { 
-      background: #2d2d44; 
-      padding: 15px; 
-      border-radius: 12px; 
-      width: 130px; 
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
-    }
+    /* Caja de Eventos (3 líneas) */
+    .caja-eventos { background: #1e1e2f; border: 1px solid #444; border-radius: 8px; padding: 10px; width: 85%; max-width: 350px; margin: 15px auto; min-height: 60px; font-size: 0.85rem; text-align: left; }
+    .panel-audio { background: #1e1e2f; padding: 15px; border-radius: 12px; display: inline-block; margin-top: 10px; }
   </style>
 </head>
 <body>
 
-  <!-- ========================================== -->
-  <!-- 🎮 PANTALLA PRINCIPAL DEL JUEGO           -->
-  <!-- ========================================== -->
+  <!-- BOTÓN PARA DESBLOQUEAR SONIDO -->
+  <button id="btn-audio-init" onclick="reproducirMusica('raining_somewhere'); this.style.display='none';">▶️ Haz clic aquí para Iniciar Sonido/Juego</button>
+
+  <!-- PANTALLA PRINCIPAL -->
   <div id="pantalla-juego" class="pantalla activa">
     <h1>PouDoorsGame 2.0</h1>
+    <p>🪙 Monedas: <span id="monedas-txt">100</span></p>
+
+    <!-- ESTADÍSTICAS -->
+    <p>🍖 Hambre:</p>
+    <div class="barra-contenedor"><div id="hambre-val" class="b-hambre"></div></div>
     
-    <!-- Stats de Pou (Miedo y Humedad 4.0) -->
-    <div>
-      <p>😱 Miedo de Pou:</p>
-      <div class="barra-contenedor"><div id="miedo-val" class="barra-miedo"></div></div>
-      <p>💧 Humedad de Pou:</p>
-      <div class="barra-contenedor"><div id="humedad-val" class="barra-humedad"></div></div>
+    <p>🤢 Empapacho:</p>
+    <div class="barra-contenedor"><div id="empapacho-val" class="b-empapacho"></div></div>
+
+    <p>😱 Miedo:</p>
+    <div class="barra-contenedor"><div id="miedo-val" class="b-miedo"></div></div>
+    
+    <p>💧 Humedad:</p>
+    <div class="barra-contenedor"><div id="humedad-val" class="b-humedad"></div></div>
+
+    <!-- CAJA DE EVENTOS (3 LÍNEAS) -->
+    <div id="eventos-box" class="caja-eventos">
+      • Bienvenido a PouDoorsGame 2.0<br>
+      • Usa los botones para explorar<br>
+      • Cuida a Pou de la lluvia
     </div>
 
+    <!-- NAVEGACIÓN -->
+    <button onclick="cambiarPantalla('pantalla-tienda')">🛒 Tienda</button>
+    <button onclick="cambiarPantalla('pantalla-cocina')">🍳 Cocina</button>
+    <button onclick="cambiarPantalla('pantalla-trofeos')">🏆 Trofeos</button>
     <br>
-    <!-- Botones de Navegación -->
-    <button onclick="cambiarPantalla('#/tienda')">🛒 Tienda</button>
-    <button onclick="cambiarPantalla('#/cocina')">🍳 Cocina</button>
-    <button onclick="cambiarPantalla('#/trofeos')">🏆 Trofeos</button>
-    <button onclick="iniciarTormenta()">🌩️ Probar Tormenta</button>
+    <button onclick="guardarPartida()">💾 Guardar (partida.pou)</button>
+    <button onclick="cargarPartida()">📂 Cargar Partida</button>
 
-    <br><br>
-    <!-- Panel de Control de Volumen -->
+    <!-- PANEL AUDIO -->
     <div class="panel-audio">
-      <h3>🔊 Ajustes de Audio</h3>
-      <label>Música: <input type="range" id="vol-musica" min="0" max="1" step="0.1" value="0.8" oninput="cambiarVolumenMusica(this.value)"></label><br><br>
-      <label>Efectos (SFX): <input type="range" id="vol-sfx" min="0" max="1" step="0.1" value="1" oninput="cambiarVolumenSFX(this.value)"></label>
+      <h3>🔊 Audio</h3>
+      Música: <input type="range" id="vol-musica" min="0" max="1" step="0.1" value="0.8" oninput="cambiarVolumenMusica(this.value)"><br>
+      SFX: <input type="range" id="vol-sfx" min="0" max="1" step="0.1" value="1" oninput="cambiarVolumenSFX(this.value)">
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- 🛒 PANTALLA DE LA TIENDA                   -->
-  <!-- ========================================== -->
+  <!-- TIENDA -->
   <div id="pantalla-tienda" class="pantalla">
-    <button class="btn-volver" onclick="volverAlJuego()">←</button>
-    <h2>🛒 Tienda de Pou</h2>
-    <div class="grid-tienda">
-      <div class="item-card">🧃 Jugo de Piña<br><b>12 Monedas</b></div>
-      <div class="item-card">🥥 Jugo de Coco<br><b>15 Monedas</b></div>
-      <div class="item-card">🥭 Jugo de Mango<br><b>12 Monedas</b></div>
-      <div class="item-card">🌯 Burrito Pizza<br><b>28 Monedas</b></div>
-      <div class="item-card">🍰 Pou-stel 3D<br><b>30 Monedas</b></div>
-      <div class="item-card">☔ Paraguas<br><b>50 Monedas</b></div>
-    </div>
+    <button onclick="volverAlJuego()">← Volver</button>
+    <h2>🛒 Tienda</h2>
+    <button onclick="comprarItem('jugo_pina')">🧃 Jugo de Piña (12M)</button>
+    <button onclick="comprarItem('burrito')">🌯 Burrito (20M)</button>
   </div>
 
-  <!-- ========================================== -->
-  <!-- 🍳 PANTALLA DE LA COCINA                  -->
-  <!-- ========================================== -->
+  <!-- COCINA -->
   <div id="pantalla-cocina" class="pantalla">
-    <button class="btn-volver" onclick="volverAlJuego()">←</button>
-    <h2>🍳 La Cocina de Pou</h2>
-    <p>Selecciona hasta 5 ingredientes para cocinar:</p>
-    <div id="slots-cocina">
-      <p>Slots vacíos...</p>
-    </div>
-    <button onclick="cocinar(['burrito', 'takis'])">Cocinar Burrito + Takis</button>
+    <button onclick="volverAlJuego()">← Volver</button>
+    <h2>🍳 Cocina</h2>
+    <p>Mezcla ingredientes para Pou</p>
   </div>
 
-  <!-- ========================================== -->
-  <!-- 🏆 PANTALLA DE TROFEOS                     -->
-  <!-- ========================================== -->
+  <!-- TROFEOS -->
   <div id="pantalla-trofeos" class="pantalla">
-    <button class="btn-volver" onclick="volverAlJuego()">←</button>
-    <h2>🏆 Logros</h2>
-    <p>☔ POU AGARRA PARAGUAS!</p>
-    <p>⚡ Tormenta eléctrica? Nah eso no existe</p>
-    <p>💥 Que? Un rayo?</p>
-    <p>🪦 Tumba Lluviosa</p>
+    <button onclick="volverAlJuego()">← Volver</button>
+    <h2>🏆 Trofeos</h2>
   </div>
 
-  <!-- ========================================== -->
-  <!-- 🔗 CARGA DE SCRIPTS DESDE RAMA JAVASCRIPT  -->
-  <!-- (Usando la CDN jsDelivr para evitar bloqueos) -->
-  <!-- ========================================== -->
+  <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/gh/rainyLoose/PouDoorsGame2.0@javascript/audio.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/rainyLoose/PouDoorsGame2.0@javascript/items.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/rainyLoose/PouDoorsGame2.0@javascript/game.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/rainyLoose/PouDoorsGame2.0@javascript/ui.js"></script>
-
-</body>
-</html>
-
 </body>
 </html>
