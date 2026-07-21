@@ -1,33 +1,20 @@
-// ==========================================
-// NAVEGACIÓN Y PANTALLAS (UI)
-// ==========================================
-
-function cambiarPantalla(hash) {
-  // Guardar automáticamente para no perder nada
-  guardarPartida();
-  window.location.hash = hash;
-}
-
-function volverAlJuego() {
-  guardarPartida();
-  window.location.hash = ''; // Regresa al juego principal
-  reproducirMusica('raining_somewhere'); // Vuelve la música normal
-}
-
-// Escuchar cambios de URL/Hash sin recargar
-window.addEventListener('hashchange', () => {
-  const ruta = window.location.hash;
-
-  if (ruta === '#/tienda') {
-    reproducirMusica('EverShop');
-    // Mostrar HTML de tienda
-  } else if (ruta === '#/trofeos') {
-    reproducirMusica('color_trophies');
-    // Mostrar HTML de trofeos
-  } else if (ruta === '#/cocina') {
-    reproducirMusica('annoyingnighttime');
-    // Mostrar HTML de cocina
-  } else {
-    // Pantalla Principal
+// NAVEGACIÓN Y MANEJO DE PANTALLAS
+window.cambiarPantalla = function(idPantalla) {
+  document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+  const target = document.getElementById(idPantalla);
+  if(target) {
+    target.classList.add('activa');
   }
-});
+  
+  if (typeof reproducirMusica === 'function') {
+    if (idPantalla === 'pantalla-tienda') reproducirMusica('EverShop');
+    else if (idPantalla === 'pantalla-trofeos') reproducirMusica('color_trophies');
+    else if (idPantalla === 'pantalla-cocina') reproducirMusica('annoyingnighttime');
+  }
+};
+
+window.volverAlJuego = function() {
+  if (typeof guardarPartida === 'function') guardarPartida();
+  window.cambiarPantalla('pantalla-juego');
+  if (typeof reproducirMusica === 'function') reproducirMusica('raining_somewhere');
+};
