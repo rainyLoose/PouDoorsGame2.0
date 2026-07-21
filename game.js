@@ -1,58 +1,65 @@
-// ==========================================
-// LÓGICA DE JUEGO Y GUARDADO (partida.pou)
-// ==========================================
-
 let estadoJuego = {
   monedas: 100,
-  hambre: 100,
-  energia: 100,
+  hambre: 0,
+  maxHambre: 250,
+  empapacho: 0,
   miedo: 0,
   humedad: 0,
-  inventario: [],
-  equipado: null
+  inventario: []
 };
 
-function cargarPartida() {
+let eventoTormentaActivo = false;
+
+window.actualizarInterfaz = function() {
+  const porcHambre = (estadoJuego.hambre / estadoJuego.maxHambre) * 100;
+  
+  document.getElementById('miedo-val').style.width = estadoJuego.miedo + '%';
+  document.getElementById('humedad-val').style.width = estadoJuego.humedad + '%';
+  document.getElementById('hambre-val').style.width = porcHambre + '%';
+  document.getElementById('empapacho-val').style.width = estadoJuego.empapacho + '%';
+  document.getElementById('monedas-txt').innerText = estadoJuego.monedas;
+  document.getElementById('hambre-txt').innerText = `${estadoJuego.hambre}/${estadoJuego.maxHambre}`;
+};
+
+window.agregarEvento = function(texto) {
+  const box = document.getElementById('eventos-box');
+  if(!box) return;
+  const lineas = box.innerHTML.split('<br>').filter(l => l.trim() !== '');
+  lineas.unshift('• ' + texto);
+  if (lineas.length > 3) lineas.pop();
+  box.innerHTML = lineas.join('<br>');
+};
+
+window.comprarEstomagoExtra = function() {
+  if (estadoJuego.monedas >= 100) {
+    if (estadoJuego.maxHambre >= 400) {
+      window.agregarEvento("¡Ya tienes la capacidad máxima (400)!");
+      return;
+    }
+    estadoJuego.monedas -= 100;
+    estadoJuego.maxHambre = 400;
+    window.actualizarInterfaz();
+    window.agregarEvento("¡Compraste Estómago Extra! Máx Hambre: 400");
+  } else {
+    window.agregarEvento("No tienes suficientes monedas (100M necesarias)");
+  }
+};
+
+window.guardarPartida = function() {
+  localStorage.setItem('partida.pou', JSON.stringify(estadoJuego));
+  window.agregarEvento("Partida guardada correctamente");
+};
+
+window.cargarPartida = function() {
   const guardado = localStorage.getItem('partida.pou');
   if (guardado) {
-    const datos = JSON.parse(guardado);
-    estadoJuego = {
-      ...estadoJuego,
-      ...datos,
-      miedo: datos.miedo !== undefined ? datos.miedo : 0,
-      humedad: datos.humedad !== undefined ? datos.humedad : 0
-    };
+    estadoJuego = JSON.parse(guardado);
+    window.actualizarInterfaz();
+    window.agregarEvento("Partida cargada de partida.pou");
   }
-}
+};
 
-function guardarPartida() {
-  localStorage.setItem('partida.pou', JSON.stringify(estadoJuego));
-}
-
-// Evento de Tormenta "Dark Rain" (10 Minutos)
-let intervaloRayo = null;
-
-function iniciarTormenta() {
-  reproducirMusica('dark_rain');
-  SFX.pou_gasp.play();
-
-  // Rayo cada 40 segundos
-  intervaloRayo = setInterval(() => {
-    SFX.explosion.play();
-    
-    // 1% probabilidad de rayo directo
-    if (Math.random() < 0.01) {
-      SFX.game_over.play();
-      alert("¡Te cayó un rayo! Game Over.");
-    } else {
-      estadoJuego.miedo = Math.min(100, estadoJuego.miedo + 15);
-      if (estadoJuego.equipado !== 'paraguas') {
-        estadoJuego.humedad = Math.min(100, estadoJuego.humedad + 20);
-      }
-      guardarPartida();
-    }
-  }, 40000);
-}
-
-// Iniciar cargando datos de partida
-cargarPartida();
+// Auto-guardado inicial / render
+document.addEventListener('DOMContentLoaded', () => {
+  window.cargarPartida();
+});
