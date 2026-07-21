@@ -4,18 +4,110 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PouDoorsGame 2.0 - Versión 4.0</title>
+  
   <style>
-    /* Estilos Básicos para la Interfaz */
-    body { font-family: sans-serif; background-color: #222; color: #fff; margin: 0; text-align: center; }
-    .pantalla { display: none; padding: 20px; }
-    .pantalla.activa { display: block; }
-    .btn-volver { position: absolute; top: 15px; left: 15px; font-size: 24px; cursor: pointer; background: #444; color: #fff; border: none; border-radius: 5px; padding: 5px 12px; }
-    .barra-contenedor { width: 80%; max-width: 300px; background: #555; height: 15px; margin: 10px auto; border-radius: 10px; overflow: hidden; }
-    .barra-miedo { width: 0%; height: 100%; background: #9b59b6; transition: width 0.3s; }
-    .barra-humedad { width: 0%; height: 100%; background: #3498db; transition: width 0.3s; }
-    .panel-audio { background: #333; padding: 15px; border-radius: 8px; display: inline-block; margin-top: 10px; }
-    .grid-tienda { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
-    .item-card { background: #444; padding: 10px; border-radius: 8px; width: 120px; }
+    /* ==========================================
+       🎨 ESTILOS MODERNOS (CSS)
+       ========================================== */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e1e2f, #111119);
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      min-height: 100vh;
+    }
+
+    h1 { 
+      font-size: 2.2rem; 
+      margin-bottom: 20px;
+      text-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+    }
+
+    .pantalla { 
+      display: none; 
+      padding: 20px; 
+      animation: fadeIn 0.3s ease-in-out; 
+    }
+    .pantalla.activa { 
+      display: block; 
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Botones Pro */
+    button {
+      background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      margin: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    button:active { 
+      transform: scale(0.95); 
+    }
+
+    .btn-volver {
+      position: absolute; 
+      top: 15px; 
+      left: 15px;
+      background: #444; 
+      font-size: 18px; 
+      padding: 8px 14px;
+      box-shadow: none;
+    }
+
+    /* Barras de Estado */
+    .barra-contenedor {
+      width: 80%; 
+      max-width: 320px;
+      background: #2a2a3d; 
+      height: 18px;
+      margin: 8px auto 20px; 
+      border-radius: 10px;
+      overflow: hidden; 
+      border: 1px solid #444;
+    }
+    .barra-miedo { width: 0%; height: 100%; background: #9b59b6; transition: width 0.4s; }
+    .barra-humedad { width: 0%; height: 100%; background: #3498db; transition: width 0.4s; }
+
+    /* Panel de Audio */
+    .panel-audio {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      padding: 20px; 
+      border-radius: 16px;
+      display: inline-block; 
+      margin-top: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .grid-tienda { 
+      display: flex; 
+      flex-wrap: wrap; 
+      justify-content: center; 
+      gap: 12px; 
+      margin-top: 20px; 
+    }
+    .item-card { 
+      background: #2d2d44; 
+      padding: 15px; 
+      border-radius: 12px; 
+      width: 130px; 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+    }
   </style>
 </head>
 <body>
@@ -92,12 +184,16 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 🔗 CARGA DIRECTA DE LA RAMA JAVASCRIPT     -->
+  <!-- 🔗 CARGA DE SCRIPTS DESDE RAMA JAVASCRIPT  -->
+  <!-- (Usando la CDN jsDelivr para evitar bloqueos) -->
   <!-- ========================================== -->
-  <script src="https://raw.githubusercontent.com/rainyLoose/PouDoorsGame2.0/javascript/audio.js"></script>
-  <script src="https://raw.githubusercontent.com/rainyLoose/PouDoorsGame2.0/javascript/items.js"></script>
-  <script src="https://raw.githubusercontent.com/rainyLoose/PouDoorsGame2.0/javascript/game.js"></script>
-  <script src="https://raw.githubusercontent.com/rainyLoose/PouDoorsGame2.0/javascript/ui.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/rainyLoose/PouDoorsGame2.0@javascript/audio.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/rainyLoose/PouDoorsGame2.0@javascript/items.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/rainyLoose/PouDoorsGame2.0@javascript/game.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/rainyLoose/PouDoorsGame2.0@javascript/ui.js"></script>
+
+</body>
+</html>
 
 </body>
 </html>
