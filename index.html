@@ -5,34 +5,102 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PouDoorsGame 2.0</title>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #121219; color: #fff; text-align: center; margin: 0; padding: 15px; }
+    /* ==========================================
+       🎨 ESTILOS GENERALES
+       ========================================== */
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background: #121219; 
+      color: #fff; 
+      text-align: center; 
+      margin: 0; 
+      padding: 15px; 
+    }
+
     .pantalla { display: none; }
     .pantalla.activa { display: block; }
-    
+
+    /* Botones */
     button { 
       background: linear-gradient(135deg, #6c5ce7, #a29bfe); 
-      color: white; border: none; padding: 12px 18px; 
-      margin: 6px; border-radius: 12px; font-weight: bold; 
-      cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      color: white; 
+      border: none; 
+      padding: 12px 18px; 
+      margin: 6px; 
+      border-radius: 12px; 
+      font-weight: bold; 
+      font-size: 0.95rem;
+      cursor: pointer; 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+      transition: transform 0.15s ease;
     }
     button:active { transform: scale(0.95); }
 
-    .barra-contenedor { width: 80%; max-width: 300px; background: #2a2a3d; height: 16px; margin: 5px auto 12px; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
+    .btn-audio-init {
+      background: linear-gradient(135deg, #00b894, #55efc4);
+      color: #121219;
+      font-size: 1rem;
+      margin-bottom: 15px;
+      width: 90%;
+      max-width: 350px;
+    }
+
+    /* Barras de Estado */
+    .barra-contenedor { 
+      width: 80%; 
+      max-width: 300px; 
+      background: #2a2a3d; 
+      height: 16px; 
+      margin: 5px auto 12px; 
+      border-radius: 8px; 
+      overflow: hidden; 
+      border: 1px solid #333; 
+    }
     .b-miedo { width: 0%; height: 100%; background: #9b59b6; transition: width 0.3s; }
     .b-humedad { width: 0%; height: 100%; background: #3498db; transition: width 0.3s; }
     .b-hambre { width: 0%; height: 100%; background: #e67e22; transition: width 0.3s; }
     .b-empapacho { width: 0%; height: 100%; background: #2ecc71; transition: width 0.3s; }
 
-    .caja-eventos { background: #1e1e2f; border: 1px solid #444; border-radius: 10px; padding: 10px; width: 85%; max-width: 350px; margin: 15px auto; min-height: 60px; font-size: 0.85rem; text-align: left; }
-    .panel-audio { background: #1e1e2f; padding: 15px; border-radius: 12px; display: inline-block; margin-top: 10px; border: 1px solid #333; }
+    /* Caja de Eventos (3 Líneas) */
+    .caja-eventos { 
+      background: #1e1e2f; 
+      border: 1px solid #444; 
+      border-radius: 10px; 
+      padding: 10px; 
+      width: 85%; 
+      max-width: 350px; 
+      margin: 15px auto; 
+      min-height: 60px; 
+      font-size: 0.85rem; 
+      text-align: left; 
+      line-height: 1.4;
+    }
+
+    /* Panel de Audio */
+    .panel-audio { 
+      background: #1e1e2f; 
+      padding: 15px; 
+      border-radius: 12px; 
+      display: inline-block; 
+      margin-top: 10px; 
+      border: 1px solid #333; 
+    }
   </style>
 </head>
 <body>
 
-  <!-- PANTALLA PRINCIPAL -->
+  <!-- BOTÓN PARA DESBLOQUEAR SONIDO EN NAVEGADORES -->
+  <button class="btn-audio-init" onclick="if(window.reproducirMusica) window.reproducirMusica('raining_somewhere'); this.style.display='none';">
+    ▶️ Toca aquí para Iniciar Música / Juego
+  </button>
+
+  <!-- ========================================== -->
+  <!-- 🎮 PANTALLA PRINCIPAL DEL JUEGO           -->
+  <!-- ========================================== -->
   <div id="pantalla-juego" class="pantalla activa">
     <h1>PouDoorsGame 2.0</h1>
-    <p>🪙 Monedas: <span id="monedas-txt">100</span></p>
+    
+    <p>📅 Día: <span id="dia-txt">1</span> | 🪙 Monedas: <span id="monedas-txt">100</span></p>
 
     <!-- ESTADÍSTICAS -->
     <p>🍖 Hambre (<span id="hambre-txt">0/250</span>):</p>
@@ -54,7 +122,7 @@
       • Cuida a Pou de la lluvia
     </div>
 
-    <!-- NAVEGACIÓN -->
+    <!-- BOTONES DE NAVEGACIÓN -->
     <button onclick="cambiarPantalla('pantalla-tienda')">🛒 Tienda</button>
     <button onclick="cambiarPantalla('pantalla-cocina')">🍳 Cocina</button>
     <button onclick="cambiarPantalla('pantalla-trofeos')">🏆 Trofeos</button>
@@ -62,38 +130,51 @@
     <button onclick="guardarPartida()">💾 Guardar (partida.pou)</button>
     <button onclick="cargarPartida()">📂 Cargar Partida</button>
 
-    <!-- PANEL AUDIO -->
+    <!-- AJUSTES DE AUDIO -->
+    <br>
     <div class="panel-audio">
-      <h3>🔊 Audio</h3>
-      Música: <input type="range" id="vol-musica" min="0" max="1" step="0.1" value="0.8" oninput="if(window.cambiarVolumenMusica) cambiarVolumenMusica(this.value)"><br>
+      <h3>🔊 Ajustes de Audio</h3>
+      Música: <input type="range" id="vol-musica" min="0" max="1" step="0.1" value="0.8" oninput="if(window.cambiarVolumenMusica) cambiarVolumenMusica(this.value)"><br><br>
       SFX: <input type="range" id="vol-sfx" min="0" max="1" step="0.1" value="1" oninput="if(window.cambiarVolumenSFX) cambiarVolumenSFX(this.value)">
     </div>
   </div>
 
-  <!-- TIENDA -->
+  <!-- ========================================== -->
+  <!-- 🛒 PANTALLA DE LA TIENDA                   -->
+  <!-- ========================================== -->
   <div id="pantalla-tienda" class="pantalla">
     <button onclick="volverAlJuego()">← Volver</button>
     <h2>🛒 Tienda</h2>
+    <p>Aumenta la capacidad o compra provisiones:</p>
     <button onclick="comprarEstomagoExtra()">🧪 Estómago Extra (+Capacidad a 400) - 100M</button>
   </div>
 
-  <!-- COCINA -->
+  <!-- ========================================== -->
+  <!-- 🍳 PANTALLA DE LA COCINA                  -->
+  <!-- ========================================== -->
   <div id="pantalla-cocina" class="pantalla">
     <button onclick="volverAlJuego()">← Volver</button>
     <h2>🍳 Cocina</h2>
     <p>Mezcla ingredientes para Pou</p>
   </div>
 
-  <!-- TROFEOS -->
+  <!-- ========================================== -->
+  <!-- 🏆 PANTALLA DE TROFEOS                     -->
+  <!-- ========================================== -->
   <div id="pantalla-trofeos" class="pantalla">
     <button onclick="volverAlJuego()">← Volver</button>
-    <h2>🏆 Trofeos</h2>
+    <h2>🏆 Logros</h2>
+    <p>☔ POU AGARRA PARAGUAS!</p>
+    <p>⚡ Tormenta eléctrica? Nah eso no existe</p>
   </div>
 
-  <!-- SCRIPTS (Con v=2 para evitar el caché molesto) -->
-  <script src="https://cdn.jsdelivr.net/gh/rainyLoose/PouDoorsGame2.0@javascript/audio.js?v=2"></script>
-  <script src="https://cdn.jsdelivr.net/gh/rainyLoose/PouDoorsGame2.0@javascript/items.js?v=2"></script>
-  <script src="https://cdn.jsdelivr.net/gh/rainyLoose/PouDoorsGame2.0@javascript/game.js?v=2"></script>
-  <script src="https://cdn.jsdelivr.net/gh/rainyLoose/PouDoorsGame2.0@javascript/ui.js?v=2"></script>
+  <!-- ========================================== -->
+  <!-- 🔗 SCRIPTS LOCALES (Cargados desde main)   -->
+  <!-- ========================================== -->
+  <script src="audio.js"></script>
+  <script src="items.js"></script>
+  <script src="game.js"></script>
+  <script src="ui.js"></script>
+
 </body>
 </html>
