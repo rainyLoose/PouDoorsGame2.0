@@ -61,7 +61,84 @@ window.comprarItem = function(idItem) {
     if (typeof window.reproducirSFX === 'function') window.reproducirSFX('comprar');
     window.agregarEvento(`Compraste ${item.nombre}`);
     window.actualizarInterfaz();
+// ==========================================
+// 🎮 LÓGICA PRINCIPAL Y ESTADO DEL JUEGO (game.js)
+// ==========================================
+
+window.estadoJuego = {
+  monedas: 12,
+  hambre: 0,
+  maxHambre: 250,
+  empapacho: 0,
+  miedo: 0,
+  humedad: 0,
+  dia: 1,
+  puerta: 0,
+  inventario: {}
+};
+
+window.actualizarInterfaz = function() {
+  const porcHambre = (window.estadoJuego.hambre / window.estadoJuego.maxHambre) * 100;
+  
+  if (document.getElementById('miedo-val')) document.getElementById('miedo-val').style.width = window.estadoJuego.miedo + '%';
+  if (document.getElementById('humedad-val')) document.getElementById('humedad-val').style.width = window.estadoJuego.humedad + '%';
+  if (document.getElementById('hambre-val')) document.getElementById('hambre-val').style.width = porcHambre + '%';
+  if (document.getElementById('empapacho-val')) document.getElementById('empapacho-val').style.width = window.estadoJuego.empapacho + '%';
+  if (document.getElementById('monedas-txt')) document.getElementById('monedas-txt').innerText = window.estadoJuego.monedas;
+  if (document.getElementById('hambre-txt')) document.getElementById('hambre-txt').innerText = `${window.estadoJuego.hambre}/${window.estadoJuego.maxHambre}`;
+  if (document.getElementById('dia-txt')) document.getElementById('dia-txt').innerText = window.estadoJuego.dia;
+  if (document.getElementById('puerta-txt')) document.getElementById('puerta-txt').innerText = window.estadoJuego.puerta;
+
+  window.renderizarInventario();
+};
+
+window.agregarEvento = function(texto) {
+  const box = document.getElementById('eventos-box');
+  if (!box) return;
+  const lineas = box.innerHTML.split('<br>').filter(l => l.trim() !== '');
+  lineas.unshift('• ' + texto);
+  if (lineas.length > 3) lineas.pop();
+  box.innerHTML = lineas.join('<br>');
+};
+
+// MECÁNICA DE PUERTAS
+window.abrirSiguientePuerta = function() {
+  window.estadoJuego.puerta++;
+  window.estadoJuego.hambre = Math.min(window.estadoJuego.maxHambre, window.estadoJuego.hambre + 10);
+  window.estadoJuego.monedas += Math.floor(Math.random() * 10) + 5;
+  
+  if (typeof window.reproducirSFX === 'function') window.reproducirSFX('trak');
+
+  if (window.estadoJuego.puerta % 10 === 0) {
+    window.estadoJuego.dia++;
+    if (typeof window.reproducirSFX === 'function') window.reproducirSFX('success');
+    window.agregarEvento(`¡Avanzaste al Día ${window.estadoJuego.dia}!`);
   } else {
+    window.agregarEvento(`Cruzaste a la Puerta ${window.estadoJuego.puerta}`);
+  }
+  
+  window.actualizarInterfaz();
+};
+
+// COMPRAR Y USAR ÍTEMS
+window.comprarItem = function(idItem) {
+  const item = window.ITEMS[idItem];
+  if (!item) return;
+
+  if (window.estadoJuego.monedas >= item.precio) {
+    window.estadoJuego.monedas -= item.precio;
+    window.estadoJuego.inventario[idItem] = (window.estadoJuego.inventario[idItem] || 0) + 1;
+    
+    // Reproduce sonido de compra y moneda
+    if (typeof window.reproducirSFX === 'function') {
+      window.reproducirSFX('buy');
+      window.reproducirSFX('coin');
+    }
+
+    window.agregarEvento(`Compraste ${item.nombre}`);
+    window.actualizarInterfaz();
+  } else {
+    if (typeof window.reproducirSFX === 'function') window.reproducirSFX('no');
     window.agregarEvento("No tienes suficientes monedas.");
   }
 };
@@ -85,7 +162,15 @@ window.usarItem = function(idItem) {
     window.estadoJuego.humedad = 0;
   }
 
-  if (typeof window.reproducirSFX === 'function') window.reproducirSFX('comer');
+  // Reproduce poción o comer según el tipo de ítem
+  if (typeof window.reproducirSFX === 'function') {
+    if (idItem.includes('potion') || idItem.includes('pocion')) {
+      window.reproducirSFX('pou_potion');
+    } else {
+      window.reproducirSFX('pou_eat');
+    }
+  }
+
   window.agregarEvento(`Usaste ${item.nombre}`);
   window.actualizarInterfaz();
 };
@@ -119,15 +204,17 @@ window.renderizarInventario = function() {
 window.comprarEstomagoExtra = function() {
   if (window.estadoJuego.monedas >= 100) {
     if (window.estadoJuego.maxHambre >= 400) {
+      if (typeof window.reproducirSFX === 'function') window.reproducirSFX('no');
       window.agregarEvento("¡Ya tienes la capacidad máxima (400)!");
       return;
     }
     window.estadoJuego.monedas -= 100;
-    window.estadoJuego.maxHambre = 400;
-    if (typeof window.reproducirSFX === 'function') window.reproducirSFX('comprar');
+    window.estadoJambre = 400;
+    if (typeof window.reproducirSFX === 'function') window.reproducirSFX('buy');
     window.actualizarInterfaz();
     window.agregarEvento("¡Estómago Extra! Máx Hambre: 400");
   } else {
+    if (typeof window.reproducirSFX === 'function') window.reproducirSFX('no');
     window.agregarEvento("Requiere 100 Monedas.");
   }
 };
@@ -141,6 +228,7 @@ window.descargarArchivoPou = function() {
   a.download = 'partida.pou';
   a.click();
   URL.revokeObjectURL(a.href);
+  if (typeof window.reproducirSFX === 'function') window.reproducirSFX('success');
   window.agregarEvento("Archivo partida.pou descargado.");
 };
 
@@ -154,8 +242,10 @@ window.cargarArchivoPou = function(event) {
       const parsed = JSON.parse(e.target.result);
       window.estadoJuego = parsed;
       window.actualizarInterfaz();
+      if (typeof window.reproducirSFX === 'function') window.reproducirSFX('success');
       window.agregarEvento("¡Partida .pou cargada con éxito!");
     } catch (err) {
+      if (typeof window.reproducirSFX === 'function') window.reproducirSFX('pou_confused');
       window.agregarEvento("Error: El archivo .pou no es válido.");
     }
   };
@@ -165,3 +255,4 @@ window.cargarArchivoPou = function(event) {
 document.addEventListener('DOMContentLoaded', () => {
   window.actualizarInterfaz();
 });
+
