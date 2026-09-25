@@ -77,77 +77,530 @@
     .item-card {
       background: #2a2a3d;
       margin: 8px auto;
-      padding: 10px;
-      border-radius: 10px;
-      max-width: 300px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-  </style>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pou Doors Game 3.2</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        
+        /* Paletas de Colores (Temas) */
+        :root {
+            --bg-body: #eef2f7;
+            --bg-container: white;
+            --text-main: #333;
+            --text-title: #1c2541;
+            --bg-panel: #f8f9fa;
+            --border-panel: #e9ecef;
+            --bg-log: #f1f3f5;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #121214;
+            --bg-container: #1a1a1e;
+            --text-main: #e1e1e6;
+            --text-title: #f4f5f6;
+            --bg-panel: #222226;
+            --border-panel: #2d2d34;
+            --bg-log: #2a2a30;
+        }
+
+        [data-theme="space"] {
+            --bg-body: #0b091a;
+            --bg-container: #14112a;
+            --text-main: #e2e0ff;
+            --text-title: #ad14f7;
+            --bg-panel: #1f1a3a;
+            --border-panel: #3d3470;
+            --bg-log: #262047;
+        }
+
+        [data-theme="aqua"] {
+            --bg-body: #004b49;
+            --bg-container: #007571;
+            --text-main: #e6fffa;
+            --text-title: #00f5d4;
+            --bg-panel: #00615e;
+            --border-panel: #008a85;
+            --bg-log: #005250;
+        }
+
+        /* FIX CSS CLIMA LLUVIOSO - Corrección de alto contraste */
+        .weather-rainy {
+            --bg-body: #1a2332 !important;
+            --bg-container: #243142 !important;
+            --text-main: #e2eafd !important;
+            --text-title: #90b4fc !important;
+            --bg-panel: #1b2636 !important;
+            --border-panel: #2e3f57 !important;
+            --bg-log: #131b26 !important;
+            transition: all 1s ease !important;
+        }
+
+        .weather-rainy #game-log {
+            color: #90b4fc !important;
+            border-left-color: #537fe7 !important;
+        }
+
+        .weather-rainy .stats-panel, 
+        .weather-rainy .stat-label, 
+        .weather-rainy .subtitle {
+            color: #e2eafd !important;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .game-container {
+            max-width: 600px;
+            margin: 30px auto;
+            background: var(--bg-container);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+            position: relative;
+            transition: background-color 0.3s;
+        }
+        
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #3a506b;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 10pt;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        h1 {
+            color: var(--text-title);
+            margin-bottom: 5px;
+            font-size: 24pt;
+        }
+        .subtitle {
+            color: var(--text-main);
+            opacity: 0.8;
+            font-size: 11pt;
+            margin-bottom: 25px;
+        }
+
+        .save-system-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-panel);
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        .file-label-btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 9pt;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .file-label-btn.disabled-btn {
+            background-color: #cccccc !important;
+            color: #888888 !important;
+            cursor: not-allowed !important;
+        }
+
+        .export-btn {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 9pt;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .export-btn:disabled {
+            background-color: #cccccc !important;
+            color: #888888 !important;
+            cursor: not-allowed !important;
+        }
+        
+        .days-counter {
+            background: #e63946;
+            color: white;
+            font-weight: bold;
+            font-size: 14pt;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 5px;
+            box-shadow: 0 4px 10px rgba(230, 57, 70, 0.2);
+        }
+        .difficulty-badge {
+            font-size: 9.5pt;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ff9f1c;
+        }
+
+        .stats-panel {
+            background: var(--bg-panel);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: left;
+            border: 1px solid var(--border-panel);
+        }
+        .stat-group { margin-bottom: 15px; }
+        
+        .stat-label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 11pt;
+        }
+        .progress-bar-container {
+            width: 100%;
+            height: 18px;
+            background-color: #e9ecef;
+            border-radius: 9px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        #hunger-bar { background-color: #4caf50; }
+        #empacho-bar { background-color: #2ec4b6; }
+        
+        .inventory-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .inventory-box {
+            background: #e2eafc;
+            color: #1d3557;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 9.5pt;
+            flex: 1;
+            min-width: 90px;
+            text-align: center;
+        }
+        
+        #coins-box { background: #fefae0; color: #b5820f; }
+        #takis-box { background: #ffe3e3; color: #c1121f; display: none; }
+
+        .log {
+            min-height: 75px;
+            margin: 15px 0 25px 0;
+            padding: 15px;
+            background: var(--bg-log);
+            border-radius: 10px;
+            font-style: italic;
+            font-size: 11pt;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-left: 5px solid #3a506b;
+            color: var(--text-main);
+        }
+
+        .doors-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0 20px 0;
+        }
+        .door-btn {
+            background-color: #3a506b;
+            color: white;
+            border: none;
+            padding: 18px 28px;
+            font-size: 14pt;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: 0.1s;
+        }
+        .door-btn:hover { background-color: #1c2541; }
+        .door-btn:disabled { background-color: #cccccc; cursor: not-allowed; color: #888888; }
+
+        .game-section-box {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: left;
+        }
+        .feed-section { background-color: #f4fbf7; border: 2px dashed #a3e635; }
+        .shop-section { background-color: #fffdf0; border: 2px dashed #eab308; }
+
+        .buttons-grid {
+            display: flex;
+            justify-content: space-around;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            color: white;
+            border: none;
+            padding: 12px 10px;
+            font-size: 9.5pt;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: 0.2s;
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+        }
+        #feed-burger { background-color: #4caf50; }
+        #feed-sandwich { background-color: #00afb9; }
+        #feed-soup { background-color: #9b5de5; }
+        #feed-takis { background-color: #c1121f; display: none; }
+        #buy-sandwich { background-color: #f1a208; }
+        #buy-potion { background-color: #d62828; }
+        #buy-upgrade { background-color: #06b6d4; min-width: 100%; }
+        .cosmetic-btn { background-color: #6c757d; font-size: 8.5pt; }
+
+        .action-btn:disabled {
+            background-color: #cccccc !important;
+            color: #888888 !important;
+            cursor: not-allowed;
+        }
+
+        /* BOTÓN Y PANEL DESPLEGABLE DE LOGROS */
+        .toggle-achievements-btn {
+            background-color: #8e44ad;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 11pt;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        .toggle-achievements-btn:hover {
+            background-color: #71279b;
+        }
+
+        .achievements-section {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-panel);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 10px;
+            text-align: left;
+            display: none;
+        }
+        .ach-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        @media(max-width: 500px) { .ach-grid { grid-template-columns: 1fr; } }
+        
+        .ach-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 8.5pt;
+            color: #888888;
+            font-weight: 500;
+            background: rgba(0,0,0,0.03);
+            padding: 6px;
+            border-radius: 6px;
+        }
+        .ach-item.unlocked { color: var(--text-main); font-weight: bold; background: rgba(0,245,212,0.08); }
+        .ach-badge { font-size: 11pt; display: inline-block; flex-shrink: 0; filter: grayscale(100%); opacity: 0.4; }
+        .ach-item.unlocked .ach-badge { filter: grayscale(0%); opacity: 1; }
+
+        .reset-btn {
+            background-color: #e63946;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 11pt;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .steam-toast {
+            position: fixed;
+            bottom: -100px;
+            right: 20px;
+            background: #171a21;
+            color: #c6d4df;
+            border: 2px solid #c7931c;
+            border-radius: 4px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-align: left;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            z-index: 9999;
+            width: 330px;
+            transition: bottom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .steam-toast.show { bottom: 20px; }
+        .steam-toast-icon { font-size: 24pt; color: #ffb800; line-height: 1; }
+        .steam-toast-content h4 { margin: 0; color: #ffffff; font-size: 10pt; letter-spacing: 0.5px; text-transform: uppercase; }
+        .steam-toast-content p { margin: 3px 0 0 0; font-size: 9pt; color: #8f98a0; }
+    </style>
 </head>
 <body>
 
-  <button class="btn-audio-init" onclick="if(window.reproducirMusica) window.reproducirMusica('raining_somewhere'); this.style.display='none';">
-    ▶️ Toca aquí para Iniciar Música / Juego
-  </button>
+<div class="game-container" id="main-box">
+    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">Modo Oscuro</button>
 
-  <!-- PANTALLA PRINCIPAL -->
-  <div id="pantalla-juego" class="pantalla activa">
-    <h1>PouDoorsGame 2.0</h1>
-    <p>📅 Día: <span id="dia-txt">1</span> | 🚪 Puerta: <span id="puerta-txt">0</span> | 🪙 Monedas: <span id="monedas-txt">100</span></p>
+    <h1>Pou Doors Game 3.2</h1>
+    <p class="subtitle">Explora con cuidado y cuida bien a Pou</p>
 
-    <p>🍖 Hambre (<span id="hambre-txt">0/250</span>):</p>
-    <div class="barra-contenedor"><div id="hambre-val" class="b-hambre"></div></div>
+    <div class="save-system-block">
+        <div>
+            <label for="import-file" class="file-label-btn" id="import-label">📁 Importar (.pou)</label>
+            <input type="file" id="import-file" accept=".pou" style="display: none;" onchange="importGame(event)">
+        </div>
+        <button class="export-btn" id="export-btn" onclick="exportGame()">💾 Exportar (.pou)</button>
+    </div>
     
-    <p>🤢 Empapacho:</p>
-    <div class="barra-contenedor"><div id="empapacho-val" class="b-empapacho"></div></div>
-
-    <p>😱 Miedo:</p>
-    <div class="barra-contenedor"><div id="miedo-val" class="b-miedo"></div></div>
+    <div class="days-counter" id="days-box">Días Sobrevividos: 0 (Puertas: 0/5)</div>
+    <div class="difficulty-badge" id="difficulty-box">Dificultad: Fácil (Hambre normal)</div>
     
-    <p>💧 Humedad:</p>
-    <div class="barra-contenedor"><div id="humedad-val" class="b-humedad"></div></div>
+    <div class="stats-panel">
+        <div class="stat-group">
+            <div class="stat-label">
+                <span>Hambre de Pou</span>
+                <span><span id="hunger-text">125</span> / <span id="max-hunger-text">250</span></span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="hunger-bar" class="progress-bar"></div>
+            </div>
+        </div>
+        
+        <div class="stat-group">
+            <div class="stat-label">
+                <span>Nivel de Empacho</span>
+                <span><span id="empacho-text">0</span> / 5</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="empacho-bar" class="progress-bar"></div>
+            </div>
+        </div>
 
-    <div id="eventos-box" class="caja-eventos">
-      • Bienvenido a PouDoorsGame 2.0<br>
-      • Explora las puertas con cuidado<br>
-      • Cuida a Pou de los peligros
+        <div class="inventory-container">
+            <div class="inventory-box">Burgers: <span id="burger-text">0</span></div>
+            <div class="inventory-box">Sandwiches: <span id="sandwich-text">0</span></div>
+            <div class="inventory-box" id="soup-box" style="background: #f3e5f5; color: #4a148c;">Sopas: <span id="soup-text">0</span></div>
+            <div class="inventory-box" id="takis-box">Takis Pou: <span id="takis-text">0</span></div>
+            <div class="inventory-box" id="coins-box">Monedas: <span id="coins-text">0</span></div>
+        </div>
     </div>
 
-    <!-- ACCIONES Y PUERTAS -->
-    <button onclick="abrirSiguientePuerta()">🚪 Abrir Siguiente Puerta</button>
-    <br>
-    <button onclick="cambiarPantalla('pantalla-tienda')">🛒 Tienda</button>
-    <button onclick="cambiarPantalla('pantalla-inventario')">🎒 Inventario</button>
-    <button onclick="cambiarPantalla('pantalla-cocina')">🍳 Cocina</button>
-    <button onclick="cambiarPantalla('pantalla-trofeos')">🏆 Logros</button>
-    <br>
-    
-    <!-- DESCARGA Y CARGA DE .POU -->
-    <button onclick="descargarArchivoPou()">💾 Guardar (.pou)</button>
-    <button onclick="document.getElementById('input-cargar-pou').click()">📂 Cargar (.pou)</button>
-    <input type="file" id="input-cargar-pou" accept=".pou" style="display:none;" onchange="cargarArchivoPou(event)">
+    <div class="log" id="game-log">Elige una puerta para comenzar la gran aventura.</div>
+    <button class="reset-btn" id="reset-btn" onclick="resetGame()">Reiniciar Juego</button>
 
-    <br>
-    <div class="panel-audio">
-      <h3>🔊 Ajustes de Audio</h3>
-      Música: <input type="range" id="vol-musica" min="0" max="1" step="0.1" value="0.8" oninput="if(window.cambiarVolumenMusica) cambiarVolumenMusica(this.value)"><br><br>
-      SFX: <input type="range" id="vol-sfx" min="0" max="1" step="0.1" value="1" oninput="if(window.cambiarVolumenSFX) cambiarVolumenSFX(this.value)">
+    <div id="game-actions">
+        <h3 style="font-size: 11pt; margin-bottom: 5px; text-align: left;">1. Explorar puertas:</h3>
+        <div class="doors-container">
+            <button class="door-btn" id="door-1" onclick="openDoor(1)">Puerta 1</button>
+            <button class="door-btn" id="door-2" onclick="openDoor(2)">Puerta 2</button>
+            <button class="door-btn" id="door-3" onclick="openDoor(3)">Puerta 3</button>
+        </div>
+
+        <div class="game-section-box feed-section">
+            <h3 style="font-size: 11pt; margin-top: 0; margin-bottom: 10px;">2. Alimentar a Pou:</h3>
+            <div class="buttons-grid">
+                <button class="action-btn" id="feed-burger" onclick="feedPou('burger')" disabled>Hamburguesa (-75)</button>
+                <button class="action-btn" id="feed-sandwich" onclick="feedPou('sandwich')" disabled>Sándwich Pou (-30)</button>
+                <button class="action-btn" id="feed-soup" onclick="feedPou('soup')" disabled>Sopa Pou (RESET)</button>
+                <button class="action-btn" id="feed-takis" onclick="feedPou('takis')" disabled>Takis Pou (-100)</button>
+            </div>
+        </div>
+
+        <div class="game-section-box shop-section">
+            <h3 style="font-size: 11pt; margin-top: 0; margin-bottom: 10px;">3. Tienda de Monedas / Cosméticos:</h3>
+            <div class="buttons-grid">
+                <button class="action-btn" id="buy-sandwich" onclick="buyItem('sandwich')" disabled>Sándwich (3 Monedas)</button>
+                <button class="action-btn" id="buy-potion" onclick="buyItem('potion')" disabled>Poción Digestión -2 (5 Monedas)</button>
+            </div>
+            <div class="buttons-grid" style="margin-top: 8px;">
+                <button class="action-btn cosmetic-btn" id="buy-theme-space" onclick="buyTheme('space')" disabled>Tema Espacio (8 Monedas)</button>
+                <button class="action-btn cosmetic-btn" id="buy-theme-aqua" onclick="buyTheme('aqua')" disabled>Tema Aqua (12 Monedas)</button>
+            </div>
+            <div class="buttons-grid" style="margin-top: 8px;">
+                <button class="action-btn" id="buy-upgrade" onclick="buyUpgrade()" disabled>⚡ Mega Estómago Pou (+50 Max) (100 Monedas)</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- TIENDA COMPLETA -->
-  <div id="pantalla-tienda" class="pantalla">
-    <button onclick="volverAlJuego()">← Volver</button>
-    <h2>🛒 Tienda</h2>
-    <button onclick="comprarEstomagoExtra()">🧪 Estómago Extra (+Capacidad a 400) - 100M</button>
-    <hr style="border-color: #333; margin: 15px 0;">
-    <div id="lista-tienda"></div>
-  </div>
+    <!-- BOTÓN Y SECCIÓN DE LOGROS -->
+    <button class="toggle-achievements-btn" id="toggle-ach-btn" onclick="toggleAchievements()">🏆 Ver Lista de Logros</button>
 
-  <!-- INVENTARIO -->
-  <div id="pantalla-inventario" class="pantalla">
+    <div class="achievements-section" id="achievements-panel">
+        <h3 style="font-size: 11pt; margin: 0;">🏆 Lista de Logros (Sistema Steam):</h3>
+        <div class="ach-grid">
+            <div class="ach-item" id="ach-join"><span class="ach-badge">🔒</span> Pou se ha unido a la partida</div>
+            <div class="ach-item" id="ach-days"><span class="ach-badge">🔒</span> Superviviente Nato (Día 5)</div>
+            <div class="ach-item" id="ach-nightmare-mode"><span class="ach-badge">🔒</span> Modo Pesadilla Activado (Día 15)</div>
+            <div class="ach-item" id="ach-surv-30"><span class="ach-badge">🔒</span> Pousito Sobreviviente Extremo (Día 30)</div>
+            <div class="ach-item" id="ach-surv-50"><span class="ach-badge">🔒</span> Pou Sobreviviente de puertas (Día 50)</div>
+            <div class="ach-item" id="ach-surv-100"><span class="ach-badge">🔒</span> ¿Cómo llegamos a esto? (Día 100)</div>
+            <div class="ach-item" id="ach-surv-300"><span class="ach-badge">🔒</span> Pou Po Pou! (Día 300)</div>
+            <div class="ach-item" id="ach-surv-500"><span class="ach-badge">🔒</span> DAME MÁS DÍAS MÁS DÍAS (Día 500)</div>
+            <div class="ach-item" id="ach-surv-1000"><span class="ach-badge">🔒</span> El final (Día 1000)</div>
+            
+            <div class="ach-item" id="ach-coins"><span class="ach-badge">🔒</span> Pou Magnate (15 Monedas)</div>
+            <div class="ach-item" id="ach-money-100"><span class="ach-badge">🔒</span> 100 - Pou Dineroso</div>
+            <div class="ach-item" id="ach-money-500"><span class="ach-badge">🔒</span> 500 - Lluvia de billetes Pou</div>
+            <div class="ach-item" id="ach-money-1000"><span class="ach-badge">🔒</span> 1000 - esto se sale de control</div>
+            <div class="ach-item" id="ach-money-2000"><span class="ach-badge">🔒</span> 2000 - Pou cómprame deltarune</div>
+            <div class="ach-item" id="ach-money-5000"><span class="ach-badge">🔒</span> 5000 - un poco mucho de dinero</div>
+            <div class="ach-item" id="ach-money-10000"><span class="ach-badge">🔒</span> 10000 - ¡Es un Sueño!</div>
+            
+            <div class="ach-item" id="ach-hack"><span class="ach-badge">🔒</span> Archivo Editado Exitosamente</div>
+            <div class="ach-item" id="ach-rainylainy"><span class="ach-badge">🔒</span> RainyLainy Thats The Name</div>
+            <div class="ach-item" id="ach-lucky20"><span class="ach-badge">🔒</span> Suerte, Suerte que Buena Es!</div>
+            <div class="ach-item" id="ach-nuggets"><span class="ach-badge">🔒</span> Nuggets Del PouDonalds</div>
+            <div class="ach-item" id="ach-takis"><span class="ach-badge">🔒</span> Exceso de Pous Picantes</div>
+        </div>
+    </div>
+</div>
+
+<!-- NOTIFICACIÓN DE LOGRO FLOTANTE (ES
+lass="pantalla">
     <button onclick="volverAlJuego()">← Volver</button>
     <h2>🎒 Inventario de Pou</h2>
     <div id="lista-inventario"><p>Tu inventario está vacío.</p></div>
